@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_standard" name="shell-type"/>
+  <title>FLINT | Architectural Workspace Systems</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- Tailwind CSS CDN & Config -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "royal-black": "#070707",
+            "dark-abyss": "#0c0d10",
+            "charcoal-monolith": "#111317",
+            "card-surface": "#14171d",
+            "elevated-surface": "#1a1e26",
+            "card-surface-raised": "#1e222b",
+            "champagne-gold": "#D4AF37",
+            "champagne-rich": "#C9A227",
+            "champagne-light": "#E0C36E",
+            "deep-brass": "#B8962E",
+            "ivory-primary": "#F4F1EA",
+            "ivory-secondary": "#A8A39A",
+            "ivory-muted": "#77736C",
+            "hairline-graphite": "rgba(255, 255, 255, 0.08)",
+            "hairline-gold": "rgba(212, 175, 55, 0.3)",
+            "primary": "#D4AF37",
+            "background": "#070707",
+            "surface": "#0c0d10",
+            "surface-container": "#111317",
+            "surface-container-low": "#0c0d10",
+            "surface-container-high": "#14171d",
+            "surface-container-highest": "#1a1e26",
+            "surface-container-lowest": "#070707",
+            "on-surface": "#F4F1EA",
+            "on-surface-variant": "#A8A39A",
+            "on-background": "#F4F1EA",
+            "outline": "#77736C",
+            "outline-variant": "rgba(255, 255, 255, 0.08)"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-3xl": "6rem",
+            "margin-mobile": "1.25rem",
+            "gutter": "1.5rem",
+            "margin": "3rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2.5rem",
+            "gutter-tablet": "1rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "margin-tablet": "2rem",
+            "space-2xl": "4rem"
+          },
+          "fontFamily": {
+            "headline-serif": ["Playfair Display", "serif"],
+            "headline-lg-mobile": ["Playfair Display", "serif"],
+            "spec-code-sm": ["JetBrains Mono", "monospace"],
+            "headline-2xl": ["Playfair Display", "serif"],
+            "spec-code": ["JetBrains Mono", "monospace"],
+            "label-caps": ["JetBrains Mono", "monospace"],
+            "body-sm": ["Hanken Grotesk", "sans-serif"],
+            "headline-md": ["Playfair Display", "serif"],
+            "headline-xl-mobile": ["Playfair Display", "serif"],
+            "headline-lg": ["Playfair Display", "serif"],
+            "headline-xl": ["Playfair Display", "serif"],
+            "headline-sm": ["Playfair Display", "serif"],
+            "body-md": ["Hanken Grotesk", "sans-serif"],
+            "headline-2xl-mobile": ["Playfair Display", "serif"],
+            "body-lg": ["Hanken Grotesk", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "400"}],
+            "spec-code-sm": ["10px", {"lineHeight": "14px", "letterSpacing": "0.1em", "fontWeight": "500"}],
+            "headline-2xl": ["68px", {"lineHeight": "76px", "letterSpacing": "-0.025em", "fontWeight": "400"}],
+            "spec-code": ["12px", {"lineHeight": "18px", "letterSpacing": "0.06em", "fontWeight": "500"}],
+            "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.16em", "fontWeight": "500"}],
+            "body-sm": ["13px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+            "headline-md": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+            "headline-xl-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+            "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "400"}],
+            "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+            "headline-sm": ["21px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+            "body-md": ["15px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "300"}],
+            "headline-2xl-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "300"}]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-royal-black font-body-md text-ivory-primary antialiased selection:bg-champagne-gold selection:text-royal-black">
+  
+  <!-- Header Navigation -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-[#070707]/90 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.8)]">
+    <div class="h-20 max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin flex items-center justify-between">
+      <div class="flex items-center gap-space-md">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-2.5 h-2.5 bg-champagne-gold shadow-[0_0_10px_rgba(212,175,55,0.4)]"></div>
+          <a class="flex flex-col" data-path="about" href="#">
+            <span class="font-headline-sm text-headline-sm text-ivory-primary tracking-wider uppercase leading-none font-headline-serif font-bold">FLINT</span>
+            <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-[0.2em] mt-1 font-semibold">Architectural Workspace Systems</span>
+          </a>
+        </div>
+      </div>
+      <nav class="hidden xl:flex items-center gap-space-xl" data-active-classes="text-champagne-gold font-semibold">
+        <a aria-current="page" class="font-label-caps text-label-caps uppercase tracking-widest transition-colors duration-150 text-champagne-gold font-semibold" data-path="about" href="#statement">About</a>
+        <a class="font-label-caps text-label-caps uppercase tracking-widest text-ivory-secondary hover:text-champagne-gold transition-colors duration-150" data-path="products" href="#products">Products</a>
+        <a class="font-label-caps text-label-caps uppercase tracking-widest text-ivory-secondary hover:text-champagne-gold transition-colors duration-150" data-path="solutions" href="#workflow">Solutions</a>
+        <a class="font-label-caps text-label-caps uppercase tracking-widest text-ivory-secondary hover:text-champagne-gold transition-colors duration-150" data-path="3d-experience" href="#3d-experience">3D Experience</a>
+        <a class="font-label-caps text-label-caps uppercase tracking-widest text-ivory-secondary hover:text-champagne-gold transition-colors duration-150" data-path="projects" href="#projects">Projects</a>
+        <a class="font-label-caps text-label-caps uppercase tracking-widest text-ivory-secondary hover:text-champagne-gold transition-colors duration-150" data-path="contact" href="#contact">Contact</a>
+      </nav>
+      <div class="flex items-center gap-space-lg">
+        <a class="inline-flex items-center justify-center px-space-md py-space-sm border border-champagne-gold/60 bg-royal-black text-champagne-gold font-label-caps text-label-caps uppercase tracking-widest transition-all duration-200 hover:bg-champagne-gold hover:text-royal-black shadow-[0_0_15px_rgba(212,175,55,0.15)]" data-path="contact" href="#contact">
+          <span class="w-1.5 h-1.5 bg-champagne-gold mr-2"></span>Get a Quote
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="w-full bg-royal-black min-h-screen">
+    
+    <!-- SECTION 1: WORKING SCROLL IMAGE-SEQUENCE ANIMATION (HERO) -->
+    <section class="scroll-container">
+      <div class="sticky-viewport">
+        <!-- Working Frame Animation Canvas -->
+        <canvas id="animationCanvas"></canvas>
+        
+        <!-- Non-Blocking HTML Text Overlay -->
+        <div class="text-overlay">
+          <div id="editorialCard" class="editorial-card">
+            <span id="editorialLabel" class="editorial-label">CRAFTED FOR</span>
+            <h1 id="editorialTitle" class="editorial-title">MODERN LIVING</h1>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: REMAINING CONTENT FROM code.html -->
+    <div class="flex flex-col w-full text-ivory-primary bg-royal-black">
+      
+      <!-- 2. BRAND / VALUE STATEMENT -->
+      <section class="w-full py-space-3xl bg-dark-abyss text-ivory-primary border-t border-b border-white/5" id="statement">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-y-12 gap-x-gutter items-start">
+            <div class="lg:col-span-4 space-y-4">
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">Structural Philosophy</span>
+              <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase leading-tight font-headline-serif">
+                Where Design Meets Performance.
+              </h2>
+              <div class="w-16 h-1 bg-champagne-gold"></div>
+            </div>
+            <div class="lg:col-span-8 space-y-6 lg:pl-12">
+              <p class="font-headline-lg text-headline-lg text-ivory-secondary font-light leading-snug font-headline-serif">
+                We operate at the convergence of architectural minimalism, industrial fabrication, and human-centric engineering.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                <div class="p-6 bg-charcoal-monolith border border-white/5 hover:border-champagne-gold/30 transition-colors shadow-sm space-y-2">
+                  <span class="font-label-caps text-label-caps uppercase text-champagne-gold">01 / Material Integrity</span>
+                  <p class="font-body-md text-body-md text-ivory-secondary">
+                    Direct procurement of hand-selected American Walnut, anodized extruded structural aluminum, Italian Calacatta slabs, and high-density acoustic poly-fibers.
+                  </p>
+                </div>
+                <div class="p-6 bg-charcoal-monolith border border-white/5 hover:border-champagne-gold/30 transition-colors shadow-sm space-y-2">
+                  <span class="font-label-caps text-label-caps uppercase text-champagne-gold">02 / CNC Tolerances</span>
+                  <p class="font-body-md text-body-md text-ivory-secondary">
+                    Every component is milled to sub-millimeter tolerances (±0.2mm) utilizing high-torque German 5-axis routers, ensuring effortless modular reconfiguration.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. COMPANY METRICS & STATISTICS -->
+      <section class="w-full py-space-2xl bg-royal-black text-ivory-primary border-b border-white/5">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors flex flex-col justify-between shadow-lg">
+              <div class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest mb-6">Scale Matrix 01</div>
+              <div class="space-y-2">
+                <div class="font-headline-2xl text-headline-2xl text-ivory-primary tracking-tight font-headline-serif flex items-baseline gap-1" data-counter="500">500<span class="text-champagne-gold font-sans font-light">+</span></div>
+                <div class="font-headline-sm text-headline-sm text-champagne-light uppercase font-headline-serif">Projects Completed</div>
+                <p class="font-body-sm text-body-sm text-ivory-muted pt-2">Over 3.2M sq.ft of transformed corporate workspace across key enterprise corridors.</p>
+              </div>
+            </div>
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors flex flex-col justify-between shadow-lg">
+              <div class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest mb-6">Scale Matrix 02</div>
+              <div class="space-y-2">
+                <div class="font-headline-2xl text-headline-2xl text-ivory-primary tracking-tight font-headline-serif flex items-baseline gap-1" data-counter="250">250<span class="text-champagne-gold font-sans font-light">+</span></div>
+                <div class="font-headline-sm text-headline-sm text-champagne-light uppercase font-headline-serif">Corporate Clients</div>
+                <p class="font-body-sm text-body-sm text-ivory-muted pt-2">Fortune 500 multinationals and high-growth technology unicorns trust our systems.</p>
+              </div>
+            </div>
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors flex flex-col justify-between shadow-lg">
+              <div class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest mb-6">Scale Matrix 03</div>
+              <div class="space-y-2">
+                <div class="font-headline-2xl text-headline-2xl text-ivory-primary tracking-tight font-headline-serif flex items-baseline gap-1" data-counter="20">20<span class="text-champagne-gold font-sans font-light">+</span></div>
+                <div class="font-headline-sm text-headline-sm text-champagne-light uppercase font-headline-serif">Institutional Clients</div>
+                <p class="font-body-sm text-body-sm text-ivory-muted pt-2">State administrative secretariats, central banks, and premier university research labs.</p>
+              </div>
+            </div>
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors flex flex-col justify-between shadow-lg">
+              <div class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest mb-6">Scale Matrix 04</div>
+              <div class="space-y-2">
+                <div class="font-headline-2xl text-headline-2xl text-ivory-primary tracking-tight font-headline-serif flex items-baseline gap-1" data-counter="15">15<span class="text-champagne-gold font-sans font-light">+</span></div>
+                <div class="font-headline-sm text-headline-sm text-champagne-light uppercase font-headline-serif">Years Experience</div>
+                <p class="font-body-sm text-body-sm text-ivory-muted pt-2">End-to-end proprietary manufacturing facility spanning 85,000 sq.ft in central India.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. ABOUT & THE 6-STEP CONCEPT TO COMPLETION JOURNEY -->
+      <section class="w-full py-space-3xl bg-dark-abyss border-b border-white/5" id="workflow">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">Systematic Engineering</span>
+              <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase mt-2 font-headline-serif">
+                From Concept to Completion.
+              </h2>
+            </div>
+            <p class="font-body-md text-body-md text-ivory-secondary max-w-md">
+              Our integrated design-fabricate-erect model provides enterprise tenants with unbroken chain-of-custody from initial sketches to final punch-list.
+            </p>
+          </div>
+          <!-- 6-Step Visual Workflow Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">01</span>
+                  <span class="material-symbols-outlined text-ivory-muted group-hover:text-champagne-gold transition-colors">architecture</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase mb-2 font-headline-serif">Concept &amp; Brief</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">Spatial capacity auditing, team density telemetry, acoustic zone demarcation, and aesthetic alignment.</p>
+              </div>
+              <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">02</span>
+                  <span class="material-symbols-outlined text-ivory-muted group-hover:text-champagne-gold transition-colors">grid_view</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase mb-2 font-headline-serif">3D BIM Design</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">Revit parameterization, photorealistic ray-traced spatial simulations, and finite element stress analysis.</p>
+              </div>
+              <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">03</span>
+                  <span class="material-symbols-outlined text-ivory-muted group-hover:text-champagne-gold transition-colors">precision_manufacturing</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase mb-2 font-headline-serif">Manufacturing</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">Laser-cutting of architectural box section steel, automated edge-banding, and proprietary powder coating.</p>
+              </div>
+              <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">04</span>
+                  <span class="material-symbols-outlined text-ivory-muted group-hover:text-champagne-gold transition-colors">verified</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase mb-2 font-headline-serif">Quality &amp; BIFMA</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">Cycle-drop tests (100,000 actuations), VOC emission verification, and laser alignment certification.</p>
+              </div>
+              <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">05</span>
+                  <span class="material-symbols-outlined text-ivory-muted group-hover:text-champagne-gold transition-colors">build_circle</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase mb-2 font-headline-serif">Rapid Installation</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">Turnkey white-glove site logistics, floor-box electrical docking, and zero-dust evening erection.</p>
+              </div>
+              <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 shadow-sm hover:shadow-md transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">06</span>
+                  <span class="material-symbols-outlined text-ivory-muted group-hover:text-champagne-gold transition-colors">published_with_changes</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase mb-2 font-headline-serif">Lifecycle Support</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">10-year structural warranty, spare parts inventory cache, and reconfiguration consulting as teams expand.</p>
+              </div>
+            </div>
+            <!-- Integrated Visual Card -->
+            <div class="lg:col-span-5 relative bg-charcoal-monolith border border-white/10 overflow-hidden flex flex-col justify-end p-8 text-ivory-primary min-h-[420px] shadow-lg">
+              <div class="absolute inset-0 z-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBIIQD_sP2JBwx1BfE4SCFloot58W-nI9Sp9vmQbpYEVCD3pQ4otJABfjzN1F3Skkz3OGUUPb1XMWelcw8VqKA-8G6kwuTGf2TXhvSyJPQt0t5drH-ILJnSTNwe90EzMRDX3bQYSQpJgj_x_lJCJeDh_vZav-HddXGio-ksNVTpQfl6qZl5Ct_Iev8S6EfoQp6l7Q37D3OJyho-9NZ9vdAVEp6NbOshcJhS8YBQMXI');">
+                <div class="absolute inset-0 bg-gradient-to-t from-royal-black via-royal-black/60 to-transparent"></div>
+              </div>
+              <div class="relative z-10 space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-royal-black/90 border border-champagne-gold/30 backdrop-blur-md">
+                  <span class="w-1.5 h-1.5 bg-champagne-gold"></span>
+                  <span class="font-spec-code-sm text-spec-code-sm uppercase tracking-widest text-champagne-light">System Highlight • Pod-4 Linear</span>
+                </div>
+                <h4 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Engineered Workstation Modules</h4>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">Acoustic PET felt screens integrate seamlessly into anodized aluminum structural raceways with modular power conduits.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PRODUCT DISCOVERY & ARCHITECTURAL CATALOG -->
+      <section class="w-full py-space-3xl bg-royal-black" id="products">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">Standard &amp; Bespoke Systems</span>
+              <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase mt-2 font-headline-serif">
+                Explore Our Furniture Collection.
+              </h2>
+              <p class="font-body-md text-body-md text-ivory-secondary mt-2 max-w-xl">
+                Thoughtfully engineered furniture matrices for executive offices, high-density tech studios, institutions, and boardrooms.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="px-4 py-2 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-wider font-semibold">All Systems</button>
+              <button class="px-4 py-2 bg-charcoal-monolith text-ivory-secondary border border-white/10 font-label-caps text-label-caps uppercase tracking-wider hover:text-champagne-gold hover:border-champagne-gold/40 transition-colors">Desks</button>
+              <button class="px-4 py-2 bg-charcoal-monolith text-ivory-secondary border border-white/10 font-label-caps text-label-caps uppercase tracking-wider hover:text-champagne-gold hover:border-champagne-gold/40 transition-colors">Seating</button>
+              <button class="px-4 py-2 bg-charcoal-monolith text-ivory-secondary border border-white/10 font-label-caps text-label-caps uppercase tracking-wider hover:text-champagne-gold hover:border-champagne-gold/40 transition-colors">Acoustics</button>
+            </div>
+          </div>
+          <!-- Asymmetric Editorial Catalog Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Product 1 -->
+            <div class="lg:col-span-2 group bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/50 overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between">
+              <div class="relative h-[380px] bg-cover bg-center overflow-hidden" style="background-image: url('https://lh3.googleusercontent.com/aida/AEtjO1WyPcl4ARc3eZF3dvImaf3K7MIqHXVizzG9uRANRAuANHz24Q1l8QNxBqWtJuhmCYz-djNJcSUkn2_NHjFamAlXMZ9MkqzV9zjjY1116HnpiQ_7v6pqHTu8Bi2IQYaZQxbaUImaRsdC9gJgMt5EbGLawhhjML14xTjLYpr-YqkB8M_n9BGQ0cj4DnGkb8FVo_8WqU3TO45pfWJNFWDXFEwVPdqtoizfFGZ3Y62rc6hk');">
+                <div class="absolute inset-0 bg-royal-black/30 group-hover:bg-royal-black/10 transition-colors duration-300"></div>
+                <div class="absolute top-4 left-4">
+                  <span class="px-3 py-1 bg-royal-black/90 text-champagne-gold border border-champagne-gold/40 font-spec-code-sm text-spec-code-sm uppercase tracking-widest backdrop-blur-md">SKU: FLINT-EXEC-01</span>
+                </div>
+              </div>
+              <div class="p-8 space-y-4">
+                <div class="flex items-baseline justify-between">
+                  <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase tracking-tight font-headline-serif">Kinesis Monolith Executive Desk</h3>
+                  <span class="font-spec-code text-spec-code text-champagne-light">3200 × 1100 × 750 mm</span>
+                </div>
+                <p class="font-body-md text-body-md text-ivory-secondary">
+                  Sculptural cantilevered solid American walnut slab supported by a dual-angled carbon-steel pylon with concealed wire raceways and Italian Calacatta marble credenza return.
+                </p>
+                <div class="pt-4 flex items-center justify-between border-t border-white/5">
+                  <button class="font-label-caps text-label-caps text-ivory-primary uppercase tracking-widest flex items-center gap-2 group-hover:text-champagne-gold transition-colors" onclick="openSpecModal('Kinesis Monolith Executive Desk', 'FLINT-EXEC-01', '3200 x 1100 x 750 mm', 'American Walnut &amp; Calacatta Stone', 'Linak motorized height pre-sets, built-in wireless Qi fast charge.')">
+                    View Architectural Specs <span class="material-symbols-outlined text-sm text-champagne-gold">arrow_forward</span>
+                  </button>
+                  <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase">BIFMA X5.5 Tested</span>
+                </div>
+              </div>
+            </div>
+            <!-- Product 2 -->
+            <div class="group bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/50 overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between">
+              <div class="relative h-[380px] bg-cover bg-center overflow-hidden" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBIIQD_sP2JBwx1BfE4SCFloot58W-nI9Sp9vmQbpYEVCD3pQ4otJABfjzN1F3Skkz3OGUUPb1XMWelcw8VqKA-8G6kwuTGf2TXhvSyJPQt0t5drH-ILJnSTNwe90EzMRDX3bQYSQpJgj_x_lJCJeDh_vZav-HddXGio-ksNVTpQfl6qZl5Ct_Iev8S6EfoQp6l7Q37D3OJyho-9NZ9vdAVEp6NbOshcJhS8YBQMXI');">
+                <div class="absolute inset-0 bg-royal-black/30 group-hover:bg-royal-black/10 transition-colors duration-300"></div>
+                <div class="absolute top-4 left-4">
+                  <span class="px-3 py-1 bg-royal-black/90 text-champagne-gold border border-champagne-gold/40 font-spec-code-sm text-spec-code-sm uppercase tracking-widest backdrop-blur-md">SKU: FLINT-POD-04</span>
+                </div>
+              </div>
+              <div class="p-8 space-y-4">
+                <div class="flex items-baseline justify-between">
+                  <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase tracking-tight font-headline-serif">Aura Linear Workstations</h3>
+                  <span class="font-spec-code text-spec-code text-champagne-light">4-Cluster Cluster</span>
+                </div>
+                <p class="font-body-md text-body-md text-ivory-secondary">
+                  High-density benching system featuring acoustic ribbed PET dividers, drop-in cable trays, and modular power sockets.
+                </p>
+                <div class="pt-4 flex items-center justify-between border-t border-white/5">
+                  <button class="font-label-caps text-label-caps text-ivory-primary uppercase tracking-widest flex items-center gap-2 group-hover:text-champagne-gold transition-colors" onclick="openSpecModal('Aura Linear Workstations', 'FLINT-POD-04', '2800 x 1400 x 1050 mm', 'Natural White Oak &amp; Ribbed PET', 'NRC 0.85 Acoustic rating, under-desk power rail.')">
+                    View Specs <span class="material-symbols-outlined text-sm text-champagne-gold">arrow_forward</span>
+                  </button>
+                  <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase">Modular</span>
+                </div>
+              </div>
+            </div>
+            <!-- Product 3 -->
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/50 flex flex-col justify-between shadow-sm transition-all">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest">SKU: FLINT-SEAT-07</span>
+                  <span class="material-symbols-outlined text-champagne-gold">chair</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Apex Task Executive Chair</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary mt-2">
+                  Synchronized 4D kinetic lumbar tracking, breathable self-adjusting elastomeric mesh, polished die-cast aluminum base.
+                </p>
+              </div>
+              <div class="pt-8">
+                <div class="text-spec-code font-spec-code text-ivory-muted mb-4">Dimensions: 680 × 680 × 1180-1280 mm</div>
+                <button class="w-full py-3 bg-card-surface border border-white/10 text-ivory-primary font-label-caps text-label-caps uppercase tracking-widest text-center hover:bg-champagne-gold hover:text-royal-black hover:border-champagne-gold transition-all" onclick="openSpecModal('Apex Task Executive Chair', 'FLINT-SEAT-07', '680 x 680 x 1280 mm', 'Die-Cast Aluminum &amp; Micro-Mesh', '12-Point Synchronous lock, 150kg BIFMA static rating.')">
+                  Inspect Mechanism
+                </button>
+              </div>
+            </div>
+            <!-- Product 4 -->
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/50 flex flex-col justify-between shadow-sm transition-all">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest">SKU: FLINT-CONF-12</span>
+                  <span class="material-symbols-outlined text-champagne-gold">groups</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Vortex 16-Seat Boardroom Slab</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary mt-2">
+                  Continuous 5.4-meter matched veneer flitch with flush motorized pop-up AV conferencing connections and acoustic baffle support.
+                </p>
+              </div>
+              <div class="pt-8">
+                <div class="text-spec-code font-spec-code text-ivory-muted mb-4">Dimensions: 5400 × 1500 × 750 mm</div>
+                <button class="w-full py-3 bg-card-surface border border-white/10 text-ivory-primary font-label-caps text-label-caps uppercase tracking-widest text-center hover:bg-champagne-gold hover:text-royal-black hover:border-champagne-gold transition-all" onclick="openSpecModal('Vortex Boardroom Slab', 'FLINT-CONF-12', '5400 x 1500 x 750 mm', 'Smoked Eucalyptus &amp; Black Anodized Steel', 'Motorized Crestron pop-up integration, Dante audio channels.')">
+                  Inspect Mechanism
+                </button>
+              </div>
+            </div>
+            <!-- Product 5 -->
+            <div class="p-8 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/50 flex flex-col justify-between shadow-sm transition-all">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest">SKU: FLINT-ACO-02</span>
+                  <span class="material-symbols-outlined text-champagne-gold">meeting_room</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Silentium Duo Private Pod</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary mt-2">
+                  34dB acoustic dampening rating, double acoustic laminated glass, integrated low-decibel turbine ventilation, and dimmable circadian lighting.
+                </p>
+              </div>
+              <div class="pt-8">
+                <div class="text-spec-code font-spec-code text-ivory-muted mb-4">Dimensions: 2100 × 1200 × 2250 mm</div>
+                <button class="w-full py-3 bg-card-surface border border-white/10 text-ivory-primary font-label-caps text-label-caps uppercase tracking-widest text-center hover:bg-champagne-gold hover:text-royal-black hover:border-champagne-gold transition-all" onclick="openSpecModal('Silentium Duo Private Pod', 'FLINT-ACO-02', '2100 x 1200 x 2250 mm', 'Acoustic Wool &amp; 12mm Acoustic Glass', 'NIC 34 dB sound reduction, dual HEPA recirculating air.')">
+                  Inspect Mechanism
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. INTERACTIVE 3D PRODUCT CONFIGURATOR -->
+      <section class="w-full py-space-3xl bg-dark-abyss text-ivory-primary border-t border-b border-white/5" id="3d-experience">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">3D PRODUCT EXPERIENCE</span>
+              <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase mt-2 font-headline-serif">
+                Explore Every Angle.
+              </h2>
+              <p class="font-body-md text-body-md text-ivory-secondary mt-2 max-w-xl">
+                Interact with our flagship executive workstation in an immersive real-time 360° viewport. Inspect material grains, cable spines, and motorized chassis.
+              </p>
+            </div>
+            <div class="flex items-center gap-4">
+              <button class="px-4 py-2 bg-charcoal-monolith hover:bg-card-surface text-ivory-secondary hover:text-champagne-gold border border-white/10 font-label-caps text-label-caps uppercase tracking-wider flex items-center gap-2 transition-colors" onclick="window.resetDeskView &amp;&amp; window.resetDeskView()">
+                <span class="material-symbols-outlined text-sm text-champagne-gold">restart_alt</span> Reset Orientation
+              </button>
+            </div>
+          </div>
+          <!-- Configurator Main Stage -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-8 relative rounded-none overflow-hidden bg-royal-black border border-white/10 shadow-2xl">
+              <div class="w-full h-[540px] relative overflow-hidden block" id="threejs-container-ANIMATION_7"></div>
+              <div class="absolute top-4 left-4 pointer-events-none flex flex-col gap-2">
+                <div class="px-3 py-1 bg-royal-black/90 border border-champagne-gold/40 backdrop-blur-md text-champagne-gold font-spec-code-sm text-spec-code-sm uppercase tracking-widest">
+                  Live WebGL 2.0 Renderer • 60 FPS
+                </div>
+                <div class="px-3 py-1 bg-royal-black/80 border border-white/10 backdrop-blur-md text-ivory-secondary font-spec-code-sm text-spec-code-sm">
+                  Current Model: Kinesis Executive Horizon (Rev 4.2)
+                </div>
+              </div>
+              <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+                <div class="px-3 py-1.5 bg-royal-black/85 border border-white/10 backdrop-blur-md text-ivory-muted font-spec-code-sm text-spec-code-sm flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-champagne-gold">360</span> Drag to rotate • Scroll to zoom
+                </div>
+                <div class="px-3 py-1.5 bg-royal-black/85 border border-champagne-gold/30 backdrop-blur-md text-champagne-gold font-spec-code-sm text-spec-code-sm">
+                  Real-time PBR Shaders
+                </div>
+              </div>
+            </div>
+            <!-- Finish Controls Sidebar -->
+            <div class="lg:col-span-4 p-8 bg-charcoal-monolith border border-white/10 space-y-8 shadow-xl">
+              <div>
+                <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block mb-2 font-semibold">Material Palette</span>
+                <h3 class="font-headline-sm text-headline-sm text-ivory-primary uppercase font-headline-serif">Select Surface Finish</h3>
+                <p class="font-body-sm text-body-sm text-ivory-muted mt-1">Select architectural veneer to dynamically re-render shaders.</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3" id="finishSelectorGroup">
+                <button class="p-3 bg-royal-black border border-champagne-gold text-left hover:border-champagne-light transition-all finish-btn ring-1 ring-champagne-gold" onclick="handleFinishChange('walnut', this)">
+                  <div class="w-full h-8 bg-[#4A3525] mb-2 shadow-inner border border-white/5"></div>
+                  <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Bespoke Walnut</div>
+                  <div class="font-spec-code-sm text-spec-code-sm text-champagne-light">Open Pore Matte</div>
+                </button>
+                <button class="p-3 bg-royal-black border border-white/10 text-left hover:border-champagne-gold/50 transition-all finish-btn" onclick="handleFinishChange('smoked-oak', this)">
+                  <div class="w-full h-8 bg-[#2C2825] mb-2 shadow-inner border border-white/5"></div>
+                  <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Smoked Oak</div>
+                  <div class="font-spec-code-sm text-spec-code-sm text-ivory-muted">Deep Brushed Grain</div>
+                </button>
+                <button class="p-3 bg-royal-black border border-white/10 text-left hover:border-champagne-gold/50 transition-all finish-btn" onclick="handleFinishChange('obsidian-ebony', this)">
+                  <div class="w-full h-8 bg-[#121315] mb-2 shadow-inner border border-white/5"></div>
+                  <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Obsidian Ebony</div>
+                  <div class="font-spec-code-sm text-spec-code-sm text-ivory-muted">Anodized Satin</div>
+                </button>
+                <button class="p-3 bg-royal-black border border-white/10 text-left hover:border-champagne-gold/50 transition-all finish-btn" onclick="handleFinishChange('travertine', this)">
+                  <div class="w-full h-8 bg-[#D4C8B5] mb-2 shadow-inner border border-white/5"></div>
+                  <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Roman Travertine</div>
+                  <div class="font-spec-code-sm text-spec-code-sm text-ivory-muted">Honed Natural Stone</div>
+                </button>
+              </div>
+              <div class="space-y-4 pt-4 border-t border-white/5">
+                <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">Structural Integration</span>
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg mt-0.5">power</span>
+                  <div>
+                    <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Concealed Power Spine</div>
+                    <div class="font-body-sm text-body-sm text-ivory-muted">Continuous aluminum raceway hides all 240V cords and Cat6A cables.</div>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg mt-0.5">height</span>
+                  <div>
+                    <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Dual Linak Actuators</div>
+                    <div class="font-body-sm text-body-sm text-ivory-muted">Whisper-quiet &lt;38dB elevation mechanism with anti-collision gyroscope.</div>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg mt-0.5">contactless</span>
+                  <div>
+                    <div class="font-label-caps text-label-caps text-ivory-primary uppercase">Inlay Qi Charger</div>
+                    <div class="font-body-sm text-body-sm text-ivory-muted">Sub-surface 15W inductive charge module embedded directly into veneer.</div>
+                  </div>
+                </div>
+              </div>
+              <a class="block w-full py-3.5 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest text-center hover:bg-champagne-light transition-colors font-semibold shadow-[0_4px_16px_rgba(212,175,55,0.25)]" href="#contact">
+                Request BIM Package for This Model
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. PROJECT SHOWCASE / PORTFOLIO -->
+      <section class="w-full py-space-3xl bg-royal-black" id="projects">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">Realized Environments</span>
+              <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase mt-2 font-headline-serif">
+                Spaces We've Transformed.
+              </h2>
+              <p class="font-body-md text-body-md text-ivory-secondary mt-2 max-w-xl">
+                A selective archive of corporate headquarters, legal offices, and research institutions executed across India and the Middle East.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button class="px-4 py-2 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-wider font-semibold">All Work</button>
+              <button class="px-4 py-2 bg-charcoal-monolith border border-white/10 text-ivory-secondary font-label-caps text-label-caps uppercase tracking-wider hover:text-champagne-gold hover:border-champagne-gold/40 transition-colors">Corporate</button>
+              <button class="px-4 py-2 bg-charcoal-monolith border border-white/10 text-ivory-secondary font-label-caps text-label-caps uppercase tracking-wider hover:text-champagne-gold hover:border-champagne-gold/40 transition-colors">Suites</button>
+              <button class="px-4 py-2 bg-charcoal-monolith border border-white/10 text-ivory-secondary font-label-caps text-label-caps uppercase tracking-wider hover:text-champagne-gold hover:border-champagne-gold/40 transition-colors">Institutions</button>
+            </div>
+          </div>
+          <!-- Project Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-charcoal-monolith border border-white/10 overflow-hidden shadow-sm hover:border-champagne-gold/50 hover:shadow-2xl transition-all group">
+              <div class="h-64 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida/AEtjO1WyPcl4ARc3eZF3dvImaf3K7MIqHXVizzG9uRANRAuANHz24Q1l8QNxBqWtJuhmCYz-djNJcSUkn2_NHjFamAlXMZ9MkqzV9zjjY1116HnpiQ_7v6pqHTu8Bi2IQYaZQxbaUImaRsdC9gJgMt5EbGLawhhjML14xTjLYpr-YqkB8M_n9BGQ0cj4DnGkb8FVo_8WqU3TO45pfWJNFWDXFEwVPdqtoizfFGZ3Y62rc6hk');">
+                <div class="w-full h-full bg-royal-black/30 group-hover:bg-transparent transition-colors"></div>
+              </div>
+              <div class="p-6 space-y-3">
+                <div class="flex items-center justify-between font-spec-code-sm text-spec-code-sm text-champagne-light uppercase">
+                  <span>Mumbai • BKC</span>
+                  <span>480 Workstations</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Lumina Financial Global HQ</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">
+                  Full 4-floor deployment of customized benching systems with motorized height-adjustable executive board suites.
+                </p>
+                <div class="pt-2 font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-wider font-semibold">
+                  Delivered in 28 Calendar Days
+                </div>
+              </div>
+            </div>
+            <div class="bg-charcoal-monolith border border-white/10 overflow-hidden shadow-sm hover:border-champagne-gold/50 hover:shadow-2xl transition-all group">
+              <div class="h-64 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBIIQD_sP2JBwx1BfE4SCFloot58W-nI9Sp9vmQbpYEVCD3pQ4otJABfjzN1F3Skkz3OGUUPb1XMWelcw8VqKA-8G6kwuTGf2TXhvSyJPQt0t5drH-ILJnSTNwe90EzMRDX3bQYSQpJgj_x_lJCJeDh_vZav-HddXGio-ksNVTpQfl6qZl5Ct_Iev8S6EfoQp6l7Q37D3OJyho-9NZ9vdAVEp6NbOshcJhS8YBQMXI');">
+                <div class="w-full h-full bg-royal-black/30 group-hover:bg-transparent transition-colors"></div>
+              </div>
+              <div class="p-6 space-y-3">
+                <div class="flex items-center justify-between font-spec-code-sm text-spec-code-sm text-champagne-light uppercase">
+                  <span>Bengaluru • Indiranagar</span>
+                  <span>120 Desks + Pods</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Apex Ventures Executive Suite</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">
+                  Bespoke solid American Walnut partner tables, acoustic privacy screens, and integrated AV boardroom installations.
+                </p>
+                <div class="pt-2 font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-wider font-semibold">
+                  Bespoke Architecture
+                </div>
+              </div>
+            </div>
+            <div class="bg-charcoal-monolith border border-white/10 overflow-hidden shadow-sm hover:border-champagne-gold/50 hover:shadow-2xl transition-all group">
+              <div class="h-64 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBxOKGbIqKgzEIZfNwBzNhgrUBCjxX4p3TnciAt8bA9aT3qhgHPpNbUyaJPr2oqvq79taUDwcc5_20Cjob7KLWTtEsSCvzOylyq_FRW77E4dRsuXOVUPyT3aOaHoW1gFgqE_DYd65Lsa-YQDFDU_jeQNromAKU7S6zD1Kx3GoaP01jUApiVjJD40XObFPDQJrvsMd1nRykLTHR6WcbYwCOTnxiH_YINezs8Xg0sfNc');">
+                <div class="w-full h-full bg-royal-black/40 group-hover:bg-transparent transition-colors"></div>
+              </div>
+              <div class="p-6 space-y-3">
+                <div class="flex items-center justify-between font-spec-code-sm text-spec-code-sm text-champagne-light uppercase">
+                  <span>Ahmedabad</span>
+                  <span>3,400 Sq.Ft Campus</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">National Design Institute Labs</h3>
+                <p class="font-body-sm text-body-sm text-ivory-secondary">
+                  Heavy-duty architectural steel drafting tables, high-density storage lockers, and modular collaborative studio pods.
+                </p>
+                <div class="pt-2 font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-wider font-semibold">
+                  Government / Institutional
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. INTERACTIVE BEFORE & AFTER SLIDER -->
+      <section class="w-full py-space-3xl bg-dark-abyss text-ivory-primary overflow-hidden border-t border-b border-white/5">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div class="lg:col-span-7">
+              <div class="relative w-full h-[460px] md:h-[520px] select-none overflow-hidden shadow-2xl bg-royal-black border border-white/10" id="comparisonContainer">
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida/AEtjO1WyPcl4ARc3eZF3dvImaf3K7MIqHXVizzG9uRANRAuANHz24Q1l8QNxBqWtJuhmCYz-djNJcSUkn2_NHjFamAlXMZ9MkqzV9zjjY1116HnpiQ_7v6pqHTu8Bi2IQYaZQxbaUImaRsdC9gJgMt5EbGLawhhjML14xTjLYpr-YqkB8M_n9BGQ0cj4DnGkb8FVo_8WqU3TO45pfWJNFWDXFEwVPdqtoizfFGZ3Y62rc6hk');">
+                  <div class="absolute top-4 right-4 px-3 py-1 bg-royal-black/90 border border-champagne-gold/30 text-champagne-light font-spec-code-sm text-spec-code-sm uppercase tracking-widest backdrop-blur-md">
+                    AFTER: Completed Executive Workspace
+                  </div>
+                </div>
+                <div class="absolute inset-0 bg-cover bg-center overflow-hidden" id="beforeImageClip" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBxOKGbIqKgzEIZfNwBzNhgrUBCjxX4p3TnciAt8bA9aT3qhgHPpNbUyaJPr2oqvq79taUDwcc5_20Cjob7KLWTtEsSCvzOylyq_FRW77E4dRsuXOVUPyT3aOaHoW1gFgqE_DYd65Lsa-YQDFDU_jeQNromAKU7S6zD1Kx3GoaP01jUApiVjJD40XObFPDQJrvsMd1nRykLTHR6WcbYwCOTnxiH_YINezs8Xg0sfNc'); width: 50%;">
+                  <div class="absolute top-4 left-4 px-3 py-1 bg-royal-black/90 border border-white/10 text-ivory-secondary font-spec-code-sm text-spec-code-sm uppercase tracking-widest backdrop-blur-md">
+                    BEFORE: Raw Concrete Shell
+                  </div>
+                </div>
+                <div class="absolute top-0 bottom-0 w-[2px] bg-champagne-gold cursor-ew-resize z-20 shadow-[0_0_12px_rgba(212,175,55,0.6)]" id="sliderHandle" style="left: 50%;">
+                  <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 bg-royal-black text-champagne-gold flex items-center justify-center shadow-2xl border-2 border-champagne-gold rounded-full">
+                    <span class="material-symbols-outlined text-sm">swap_horiz</span>
+                  </div>
+                </div>
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none px-4 py-1.5 bg-royal-black/90 border border-white/10 text-ivory-secondary text-spec-code-sm font-spec-code-sm uppercase tracking-widest backdrop-blur-md shadow-md">
+                  Drag Slider Horizontally to Reveal
+                </div>
+              </div>
+            </div>
+            <div class="lg:col-span-5 space-y-6">
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">PROJECT TRANSFORMATION</span>
+              <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase leading-tight font-headline-serif">
+                See the Difference.
+              </h2>
+              <p class="font-body-md text-body-md text-ivory-secondary">
+                From cold, raw industrial slabs with bare concrete pillars to world-class executive workspaces executed with clinical architectural precision.
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg">verified</span>
+                  <span class="font-label-caps text-label-caps uppercase text-ivory-primary">Premium Architectural Materials</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg">verified</span>
+                  <span class="font-label-caps text-label-caps uppercase text-ivory-primary">BIFMA Ergonomic Engineering</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg">verified</span>
+                  <span class="font-label-caps text-label-caps uppercase text-ivory-primary">Bespoke Custom Fabrication</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg">verified</span>
+                  <span class="font-label-caps text-label-caps uppercase text-ivory-primary">Turnkey 14-Day Deployment</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg">verified</span>
+                  <span class="font-label-caps text-label-caps uppercase text-ivory-primary">10-Year Structural Warranty</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-champagne-gold text-lg">verified</span>
+                  <span class="font-label-caps text-label-caps uppercase text-ivory-primary">Dedicated Space Consultant</span>
+                </div>
+              </div>
+              <div class="pt-4">
+                <a class="inline-flex items-center gap-2 px-6 py-3.5 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-all shadow-md font-semibold" href="#contact">
+                  Request On-Site Audit <span class="material-symbols-outlined text-sm">calendar_month</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. CUSTOM SOLUTIONS & 9-STEP WORKFLOW TIMELINE -->
+      <section class="w-full py-space-3xl bg-royal-black">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest font-semibold">End-to-End Orchestration</span>
+            <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase font-headline-serif">
+              Built Around Your Space.
+            </h2>
+            <p class="font-body-md text-body-md text-ivory-secondary">
+              A disciplined nine-phase architectural methodology engineered to remove friction, budget overruns, and timeline slips.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-9 gap-4">
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">01</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">Initial Brief</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Requirement analysis and headcount growth projection.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">02</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">Site Study</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Laser scan spatial topography and floor box coordinates.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">03</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">3D BIM Plan</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Revit integration and circulation flow modeling.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">04</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">Material Curation</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Physical sample box delivered with veneers and fabrics.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">05</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">Engineering</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">CAD shop drawings and finite load simulation.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">06</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">Fabrication</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Automated German CNC machining at our central facility.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">07</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">QA &amp; Pre-Fit</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Pre-assembly trial in factory to ensure zero snagging.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">08</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">Site Delivery</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Turnkey night installation with clean-room protocol.</p>
+              </div>
+            </div>
+            <div class="p-4 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/40 transition-colors shadow-sm flex flex-col justify-between h-44">
+              <div class="font-headline-md text-headline-md text-champagne-gold font-headline-serif font-semibold">09</div>
+              <div class="space-y-1">
+                <div class="font-label-caps text-label-caps text-ivory-primary uppercase font-semibold">10-Yr Handover</div>
+                <p class="font-body-sm text-body-sm text-ivory-secondary text-[12px] leading-tight">Asset tagging and dedicated lifecycle account director.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. CLIENT TRUST & TESTIMONIALS -->
+      <section class="w-full py-space-3xl bg-dark-abyss text-ivory-primary border-t border-b border-white/5">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="mb-16 pb-8 border-b border-white/10">
+            <div class="font-spec-code-sm text-spec-code-sm text-champagne-light uppercase tracking-widest mb-6 text-center">
+              Trusted by Chief Infrastructure Officers &amp; Architectural Firms Nationwide
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center text-center">
+              <div class="p-4 bg-charcoal-monolith border border-white/5 font-headline-sm text-headline-sm uppercase tracking-widest text-ivory-primary font-headline-serif">KRONOS</div>
+              <div class="p-4 bg-charcoal-monolith border border-white/5 font-headline-sm text-headline-sm uppercase tracking-widest text-ivory-primary font-headline-serif">NEXUS CAP</div>
+              <div class="p-4 bg-charcoal-monolith border border-white/5 font-headline-sm text-headline-sm uppercase tracking-widest text-ivory-primary font-headline-serif">AETHER</div>
+              <div class="p-4 bg-charcoal-monolith border border-white/5 font-headline-sm text-headline-sm uppercase tracking-widest text-ivory-primary font-headline-serif">SOLARIS</div>
+              <div class="p-4 bg-charcoal-monolith border border-white/5 font-headline-sm text-headline-sm uppercase tracking-widest text-ivory-primary font-headline-serif">VORTEX LABS</div>
+              <div class="p-4 bg-charcoal-monolith border border-white/5 font-headline-sm text-headline-sm uppercase tracking-widest text-ivory-primary font-headline-serif">STRATA ARCH</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+              <div class="w-12 h-1 bg-champagne-gold"></div>
+              <blockquote class="font-headline-lg text-headline-lg text-ivory-primary font-light leading-snug font-headline-serif">
+                “FLINT engineered our 600-person campus furniture matrix under an aggressive 24-day timeline. Their joinery and acoustic integrations are superior to any European import we evaluated.”
+              </blockquote>
+              <div>
+                <div class="font-headline-sm text-headline-sm text-champagne-light uppercase font-headline-serif">Vikramaditya Singhania</div>
+                <div class="font-spec-code text-spec-code text-ivory-muted">Chief Infrastructure Officer • Lumina Global Capital</div>
+              </div>
+            </div>
+            <div class="space-y-6">
+              <div class="w-12 h-1 bg-champagne-gold"></div>
+              <blockquote class="font-headline-lg text-headline-lg text-ivory-primary font-light leading-snug font-headline-serif">
+                “The cantilevered monolith executive desks transformed our board floor into an undeniable spatial statement. They handle bespoke architectural adaptations with effortless proficiency.”
+              </blockquote>
+              <div>
+                <div class="font-headline-sm text-headline-sm text-champagne-light uppercase font-headline-serif">Elena Rostova, AIA</div>
+                <div class="font-spec-code text-spec-code text-ivory-muted">Principal Partner • Studio Forma Architects</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. CLOSING INQUIRY & CONTACT SECTION -->
+      <section class="w-full py-space-3xl bg-royal-black text-ivory-primary" id="contact">
+        <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div class="lg:col-span-5 space-y-8">
+              <div>
+                <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest block font-semibold">Initiate Project Consultation</span>
+                <h2 class="font-headline-xl text-headline-xl text-ivory-primary tracking-tight uppercase mt-2 font-headline-serif">
+                  Let's Build Your Workspace.
+                </h2>
+                <p class="font-body-md text-body-md text-ivory-secondary mt-4 leading-relaxed">
+                  Connect directly with FLINT. We generate comprehensive 3D layout schemes and firm quotations within 48 business hours.
+                </p>
+              </div>
+              <div class="space-y-6 pt-4">
+                <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/30 transition-colors shadow-sm flex items-start gap-4">
+                  <span class="material-symbols-outlined text-champagne-gold text-2xl mt-1">call</span>
+                  <div>
+                    <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase block">Direct FLINT Line</span>
+                    <a class="font-headline-sm text-headline-sm text-ivory-primary hover:text-champagne-gold transition-colors font-spec-code" href="tel:+918770913029">
+                      +91 87709 13029
+                    </a>
+                  </div>
+                </div>
+                <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/30 transition-colors shadow-sm flex items-start gap-4">
+                  <span class="material-symbols-outlined text-champagne-gold text-2xl mt-1">mail</span>
+                  <div>
+                    <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase block">Official Correspondence</span>
+                    <a class="font-headline-sm text-headline-sm text-ivory-primary hover:text-champagne-gold transition-colors font-spec-code" href="mailto:fkincorporations@gmail.com">
+                      fkincorporations@gmail.com
+                    </a>
+                  </div>
+                </div>
+                <div class="p-6 bg-charcoal-monolith border border-white/10 hover:border-champagne-gold/30 transition-colors shadow-sm flex items-start gap-4">
+                  <span class="material-symbols-outlined text-champagne-gold text-2xl mt-1">location_on</span>
+                  <div>
+                    <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase block">FLINT HQ &amp; Factory</span>
+                    <div class="font-body-md text-body-md text-ivory-primary font-medium">
+                      Bhopal, Madhya Pradesh, India
+                    </div>
+                    <div class="font-spec-code-sm text-spec-code-sm text-ivory-muted mt-1">
+                      Visits available by prior architectural appointment.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Interactive Quotation Form -->
+            <div class="lg:col-span-7 bg-charcoal-monolith border border-white/10 p-8 md:p-12 shadow-2xl">
+              <form class="space-y-6" id="projectQuoteForm" onsubmit="handleQuoteSubmit(event)">
+                <div class="space-y-2">
+                  <span class="font-label-caps text-label-caps text-champagne-gold uppercase tracking-widest font-semibold">Project Inquiry Matrix</span>
+                  <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Request Commercial Estimate</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="fullName">Full Name *</label>
+                    <input class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="fullName" placeholder="e.g. Ar. Rajan Mehta" required="" type="text"/>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="orgName">Organization / Practice *</label>
+                    <input class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="orgName" placeholder="e.g. Studio Vertex Architecture" required="" type="text"/>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="emailAddr">Work Email *</label>
+                    <input class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="emailAddr" placeholder="name@company.com" required="" type="email"/>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="phoneNumber">Phone Number *</label>
+                    <input class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="phoneNumber" placeholder="+91 98000 00000" required="" type="tel"/>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="projectType">Project Classification *</label>
+                    <select class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="projectType">
+                      <option value="corporate">Corporate Headquarters</option>
+                      <option value="executive">Executive Board Suite</option>
+                      <option value="coworking">Commercial Coworking Facility</option>
+                      <option value="institutional">Institutional / University</option>
+                      <option value="bespoke">Custom Architectural Prototype</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="carpetArea">Approximate Area (Sq.Ft)</label>
+                    <input class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="carpetArea" placeholder="e.g. 12,500 sq.ft" type="text"/>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="projectScope">Scope &amp; Specification Details</label>
+                  <textarea class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none focus:ring-1 focus:ring-champagne-gold" id="projectScope" placeholder="Detail desk counts, preferred wood species, timeline requirements..." rows="4"></textarea>
+                </div>
+                <div class="hidden p-4 bg-champagne-gold/20 border border-champagne-gold text-champagne-light font-spec-code text-spec-code" id="formStatusNotice"></div>
+                <button class="w-full py-4 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-all flex items-center justify-center gap-2 font-semibold shadow-[0_4px_20px_rgba(212,175,55,0.3)]" type="submit">
+                  <span class="w-2 h-2 bg-royal-black"></span> Dispatch Specifications to Engineering
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SPECIFICATION MODAL -->
+      <div class="fixed inset-0 z-50 bg-royal-black/85 backdrop-blur-md hidden flex items-center justify-center p-4" id="specModal">
+        <div class="bg-charcoal-monolith border border-champagne-gold/40 text-ivory-primary max-w-2xl w-full p-8 shadow-2xl relative">
+          <button class="absolute top-6 right-6 text-ivory-secondary hover:text-champagne-gold transition-colors" onclick="closeSpecModal()">
+            <span class="material-symbols-outlined text-2xl">close</span>
+          </button>
+          <div class="space-y-6">
+            <div>
+              <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest" id="modalSku">SKU: FLINT-SPEC-00</span>
+              <h3 class="font-headline-lg text-headline-lg text-ivory-primary uppercase mt-1 font-headline-serif" id="modalTitle">Product Architectural Name</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-4 p-4 bg-card-surface border border-white/5">
+              <div>
+                <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Dimensions (W × D × H)</div>
+                <div class="font-spec-code text-spec-code font-bold mt-1 text-champagne-light" id="modalDims">-</div>
+              </div>
+              <div>
+                <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Primary Materiality</div>
+                <div class="font-spec-code text-spec-code font-bold mt-1 text-champagne-light" id="modalMaterials">-</div>
+              </div>
+            </div>
+            <div>
+              <div class="font-label-caps text-label-caps text-ivory-muted uppercase mb-1">Engineering Highlights</div>
+              <p class="font-body-md text-body-md text-ivory-secondary" id="modalHighlights">-</p>
+            </div>
+            <div class="flex items-center gap-4 pt-4 border-t border-white/10">
+              <a class="px-6 py-3 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-colors font-semibold" href="#contact" onclick="closeSpecModal()">
+                Request Formal Quotation
+              </a>
+              <button class="px-6 py-3 bg-card-surface border border-white/10 text-ivory-primary font-label-caps text-label-caps uppercase tracking-widest hover:border-champagne-gold hover:text-champagne-gold transition-colors flex items-center gap-2" onclick="alert('Downloading standard Revit/BIM 2024 family bundle (.rfa)...')">
+                <span class="material-symbols-outlined text-sm text-champagne-gold">download</span> Download Revit RFA
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three.js CDN and Interactive Configurator Scripts -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+      <script>
+        // Three.js 3D Interactive Configurator Execution
+        (function initThreeScene() {
+          const container = document.getElementById('threejs-container-ANIMATION_7');
+          if (!container || typeof THREE === 'undefined') return;
+
+          const scene = new THREE.Scene();
+          scene.background = new THREE.Color(0x0e1014);
+
+          const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 1000);
+          camera.position.set(4, 2.5, 4.5);
+
+          const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+          renderer.setSize(container.clientWidth, container.clientHeight);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          container.appendChild(renderer.domElement);
+
+          // Ambient & Studio Lighting
+          const ambientLight = new THREE.AmbientLight(0xfff8e7, 0.85);
+          scene.add(ambientLight);
+
+          const dirLight = new THREE.DirectionalLight(0xfff3d4, 1.4);
+          dirLight.position.set(5, 8, 4);
+          dirLight.castShadow = true;
+          dirLight.shadow.mapSize.width = 1024;
+          dirLight.shadow.mapSize.height = 1024;
+          scene.add(dirLight);
+
+          const fillLight = new THREE.DirectionalLight(0xd4af37, 0.4);
+          fillLight.position.set(-5, 3, -4);
+          scene.add(fillLight);
+
+          // Desk Root Group
+          const deskGroup = new THREE.Group();
+          scene.add(deskGroup);
+
+          // Finishes Library
+          const finishMaterials = {
+            'walnut': new THREE.MeshStandardMaterial({ color: 0x4A3525, roughness: 0.35, metalness: 0.05 }),
+            'smoked-oak': new THREE.MeshStandardMaterial({ color: 0x24201c, roughness: 0.45, metalness: 0.05 }),
+            'obsidian-ebony': new THREE.MeshStandardMaterial({ color: 0x141517, roughness: 0.25, metalness: 0.1 }),
+            'travertine': new THREE.MeshStandardMaterial({ color: 0xD4C8B5, roughness: 0.6, metalness: 0.02 })
+          };
+
+          const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x1d2024, roughness: 0.3, metalness: 0.85 });
+          const goldTrimMaterial = new THREE.MeshStandardMaterial({ color: 0xD4AF37, roughness: 0.3, metalness: 0.8 });
+
+          // Desk Top Slab
+          const topGeo = new THREE.BoxGeometry(3.2, 0.09, 1.3);
+          const deskTop = new THREE.Mesh(topGeo, finishMaterials['walnut']);
+          deskTop.position.set(0, 0.75, 0);
+          deskTop.castShadow = true;
+          deskTop.receiveShadow = true;
+          deskGroup.add(deskTop);
+
+          // Gold Edge Inlay Trim
+          const goldTrimGeo = new THREE.BoxGeometry(3.22, 0.015, 1.32);
+          const goldTrim = new THREE.Mesh(goldTrimGeo, goldTrimMaterial);
+          goldTrim.position.set(0, 0.705, 0);
+          deskGroup.add(goldTrim);
+
+          // Left Angular Monolith Pylon Leg
+          const pylonGeo = new THREE.BoxGeometry(0.55, 0.75, 1.1);
+          const pylonLeft = new THREE.Mesh(pylonGeo, metalMaterial);
+          pylonLeft.position.set(-1.15, 0.375, 0);
+          pylonLeft.rotation.z = 0.08;
+          pylonLeft.castShadow = true;
+          deskGroup.add(pylonLeft);
+
+          // Right Cantilever Wing Leg
+          const rightLegGeo = new THREE.BoxGeometry(0.12, 0.75, 1.0);
+          const legRight = new THREE.Mesh(rightLegGeo, metalMaterial);
+          legRight.position.set(1.2, 0.375, 0);
+          legRight.rotation.z = -0.12;
+          legRight.castShadow = true;
+          deskGroup.add(legRight);
+
+          // Return Credenza / Cabinet Module
+          const credenzaGeo = new THREE.BoxGeometry(0.9, 0.48, 0.75);
+          const credenza = new THREE.Mesh(credenzaGeo, finishMaterials['walnut']);
+          credenza.position.set(-1.1, 0.24, -0.65);
+          credenza.castShadow = true;
+          deskGroup.add(credenza);
+
+          // Floor Shadow Plane
+          const floorGeo = new THREE.PlaneGeometry(12, 12);
+          const floorMat = new THREE.ShadowMaterial({ opacity: 0.45 });
+          const floor = new THREE.Mesh(floorGeo, floorMat);
+          floor.rotation.x = -Math.PI / 2;
+          floor.position.y = 0;
+          floor.receiveShadow = true;
+          scene.add(floor);
+
+          // Interactive Mouse Orbit Simulation
+          let isInteracting = false;
+          let prevMouseX = 0;
+          let prevMouseY = 0;
+          let targetRotationY = 0.55;
+          let targetRotationX = 0.2;
+
+          container.addEventListener('mousedown', (e) => {
+            isInteracting = true;
+            prevMouseX = e.clientX;
+            prevMouseY = e.clientY;
+          });
+
+          window.addEventListener('mouseup', () => isInteracting = false);
+
+          window.addEventListener('mousemove', (e) => {
+            if (!isInteracting) return;
+            const deltaX = e.clientX - prevMouseX;
+            const deltaY = e.clientY - prevMouseY;
+            prevMouseX = e.clientX;
+            prevMouseY = e.clientY;
+
+            targetRotationY += deltaX * 0.007;
+            targetRotationX += deltaY * 0.005;
+            targetRotationX = Math.max(0.05, Math.min(Math.PI / 3, targetRotationX));
+          });
+
+          // Mouse Wheel Zoom
+          container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            camera.position.z += e.deltaY * 0.003;
+            camera.position.z = Math.max(3.0, Math.min(7.5, camera.position.z));
+          }, { passive: false });
+
+          // Resize Handler
+          window.addEventListener('resize', () => {
+            if (!container) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+          });
+
+          // Public Finish Swapper Hook
+          window.setDeskFinish = function(finishKey) {
+            if (finishMaterials[finishKey]) {
+              deskTop.material = finishMaterials[finishKey];
+              credenza.material = finishMaterials[finishKey];
+            }
+          };
+
+          // Reset Viewport Hook
+          window.resetDeskView = function() {
+            targetRotationY = 0.55;
+            targetRotationX = 0.2;
+            camera.position.set(4, 2.5, 4.5);
+          };
+
+          // Animation Loop
+          function animate() {
+            requestAnimationFrame(animate);
+
+            deskGroup.rotation.y += (targetRotationY - deskGroup.rotation.y) * 0.08;
+            deskGroup.rotation.x += (targetRotationX - deskGroup.rotation.x) * 0.08;
+
+            camera.lookAt(0, 0.45, 0);
+            renderer.render(scene, camera);
+          }
+          animate();
+        })();
+
+        // 1. Before/After Transformation Slider Logic
+        (function initComparisonSlider() {
+          const container = document.getElementById('comparisonContainer');
+          const clip = document.getElementById('beforeImageClip');
+          const handle = document.getElementById('sliderHandle');
+          if (!container || !clip || !handle) return;
+
+          let isDragging = false;
+
+          function updateSlider(clientX) {
+            const rect = container.getBoundingClientRect();
+            let x = clientX - rect.left;
+            if (x < 0) x = 0;
+            if (x > rect.width) x = rect.width;
+            const percentage = (x / rect.width) * 100;
+            clip.style.width = percentage + '%';
+            handle.style.left = percentage + '%';
+          }
+
+          handle.addEventListener('mousedown', () => isDragging = true);
+          container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            updateSlider(e.clientX);
+          });
+
+          window.addEventListener('mouseup', () => isDragging = false);
+          window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            updateSlider(e.clientX);
+          });
+
+          // Touch events support
+          container.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            updateSlider(e.touches[0].clientX);
+          }, { passive: true });
+
+          window.addEventListener('touchend', () => isDragging = false);
+          window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            updateSlider(e.touches[0].clientX);
+          }, { passive: true });
+        })();
+
+        // 2. 3D Finish Changer Hook
+        function handleFinishChange(finishId, btnElem) {
+          document.querySelectorAll('.finish-btn').forEach(btn => {
+            btn.classList.remove('ring-1', 'ring-champagne-gold', 'border-champagne-gold');
+            btn.classList.add('border-white/10');
+          });
+          btnElem.classList.remove('border-white/10');
+          btnElem.classList.add('ring-1', 'ring-champagne-gold', 'border-champagne-gold');
+
+          if (typeof window.setDeskFinish === 'function') {
+            window.setDeskFinish(finishId);
+          }
+        }
+
+        // 3. Spec Modal Logic
+        function openSpecModal(title, sku, dims, materials, highlights) {
+          document.getElementById('modalTitle').innerText = title;
+          document.getElementById('modalSku').innerText = 'SKU: ' + sku;
+          document.getElementById('modalDims').innerText = dims;
+          document.getElementById('modalMaterials').innerText = materials;
+          document.getElementById('modalHighlights').innerText = highlights;
+          document.getElementById('specModal').classList.remove('hidden');
+        }
+
+        function closeSpecModal() {
+          document.getElementById('specModal').classList.add('hidden');
+        }
+
+        // 4. Quotation Form Submission Handler
+        function handleQuoteSubmit(e) {
+          e.preventDefault();
+          const statusNotice = document.getElementById('formStatusNotice');
+          statusNotice.classList.remove('hidden');
+          statusNotice.innerHTML = '&#10003; Project specifications received. A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
+          document.getElementById('projectQuoteForm').reset();
+        }
+      </script>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full bg-royal-black text-ivory-primary pt-space-3xl pb-space-2xl border-t border-white/10">
+    <div class="max-w-[1600px] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-y-space-2xl gap-x-gutter mb-space-3xl">
+        <div class="lg:col-span-4 flex flex-col justify-between pr-space-lg">
+          <div class="space-y-space-md">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-3 h-3 bg-champagne-gold shadow-[0_0_10px_rgba(212,175,55,0.4)]"></div>
+              <span class="font-headline-md text-headline-md text-ivory-primary tracking-wider uppercase font-headline-serif font-bold">FLINT</span>
+            </div>
+            <p class="font-headline-lg-mobile text-headline-lg-mobile text-champagne-light max-w-sm font-light leading-snug font-headline-serif">“Shaping Your Vision Into Reality”</p>
+            <p class="font-body-sm text-body-sm text-ivory-secondary max-w-md">Precision commercial furniture engineering, architectural workspace interiors, and computational fabrication for enterprise environments.</p>
+          </div>
+          <div class="pt-space-xl">
+            <div class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest font-semibold">Registered FLINT Facility</div>
+            <div class="font-spec-code text-spec-code text-ivory-muted mt-1">ISO 9001:2015 · BIFMA Compliant Systems</div>
+          </div>
+        </div>
+        <div class="lg:col-span-3 space-y-space-md">
+          <h4 class="font-label-caps text-label-caps uppercase text-champagne-gold tracking-widest font-semibold">Workspace Matrices</h4>
+          <ul class="space-y-space-sm font-body-sm text-body-sm text-ivory-secondary">
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#products">Workstations &amp; Linear Benches</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#products">Executive Tables &amp; Slabs</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#products">Storage &amp; Modular Credenzas</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#products">Ergonomic Task Chairs</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#products">Executive Pods &amp; Cabins</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#products">Institutional Architecture</a></li>
+          </ul>
+        </div>
+        <div class="lg:col-span-2 space-y-space-md">
+          <h4 class="font-label-caps text-label-caps uppercase text-champagne-gold tracking-widest font-semibold">Engineering Support</h4>
+          <ul class="space-y-space-sm font-body-sm text-body-sm text-ivory-secondary">
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#3d-experience">BIM &amp; Revit Library</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#statement">Material Finishes Studio</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#statement">Acoustic Specifications</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#statement">Testing Certifications</a></li>
+            <li class="flex items-center gap-space-xs"><span class="w-1 h-1 bg-champagne-gold"></span><a class="hover:text-champagne-gold transition-colors" href="#contact">Warranty &amp; Care Matrix</a></li>
+          </ul>
+        </div>
+        <div class="lg:col-span-3 space-y-space-md">
+          <h4 class="font-label-caps text-label-caps uppercase text-champagne-gold tracking-widest font-semibold">FLINT Headquarters</h4>
+          <div class="space-y-space-sm font-body-sm text-body-sm text-ivory-secondary">
+            <div class="flex items-start gap-space-sm">
+              <span class="material-symbols-outlined text-champagne-gold text-[18px] mt-0.5">location_on</span>
+              <div>
+                <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase block">Location</span>
+                <span class="text-ivory-primary">Bhopal, Madhya Pradesh, India</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-space-sm">
+              <span class="material-symbols-outlined text-champagne-gold text-[18px] mt-0.5">call</span>
+              <div>
+                <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase block">Phone</span>
+                <a class="hover:text-champagne-gold transition-colors font-spec-code text-spec-code text-ivory-primary" href="tel:+918770913029">+91 87709 13029</a>
+              </div>
+            </div>
+            <div class="flex items-start gap-space-sm">
+              <span class="material-symbols-outlined text-champagne-gold text-[18px] mt-0.5">mail</span>
+              <div>
+                <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase block">Electronic Mail</span>
+                <a class="hover:text-champagne-gold transition-colors font-spec-code text-spec-code text-ivory-primary" href="mailto:fkincorporations@gmail.com">fkincorporations@gmail.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pt-space-xl border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-space-md">
+        <div class="flex flex-wrap items-center gap-space-lg">
+          <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase tracking-wider">© 2025 FLINT. All Rights Reserved.</span>
+        </div>
+        <div class="flex items-center gap-space-md">
+          <a aria-label="LinkedIn Portfolio" class="w-9 h-9 bg-charcoal-monolith border border-white/10 flex items-center justify-center text-ivory-secondary hover:text-champagne-gold hover:border-champagne-gold/50 transition-all" href="#"><span class="material-symbols-outlined text-[18px]">corporate_fare</span></a>
+          <a aria-label="Instagram Archive" class="w-9 h-9 bg-charcoal-monolith border border-white/10 flex items-center justify-center text-ivory-secondary hover:text-champagne-gold hover:border-champagne-gold/50 transition-all" href="#"><span class="material-symbols-outlined text-[18px]">photo_camera</span></a>
+          <a aria-label="BIM Network" class="w-9 h-9 bg-charcoal-monolith border border-white/10 flex items-center justify-center text-ivory-secondary hover:text-champagne-gold hover:border-champagne-gold/50 transition-all" href="#"><span class="material-symbols-outlined text-[18px]">hub</span></a>
+          <a aria-label="Global Location" class="w-9 h-9 bg-charcoal-monolith border border-white/10 flex items-center justify-center text-ivory-secondary hover:text-champagne-gold hover:border-champagne-gold/50 transition-all" href="#"><span class="material-symbols-outlined text-[18px]">public</span></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll Animation Script -->
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
