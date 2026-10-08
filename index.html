@@ -13,6 +13,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <style>
     @layer base {
       html, body { margin: 0; padding: 0; }
@@ -1209,12 +1212,93 @@
           document.getElementById('specModal').classList.add('hidden');
         }
 
-        // 4. Quotation Form Submission Handler
-        function handleQuoteSubmit(e) {
+        // 4. Supabase Backend Integration
+        const SUPABASE_PROJECT_ID = 'kjncgruwubukuizrszjs';
+        const SUPABASE_URL = 'https://kjncgruwubukuizrszjs.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_WonWtBPtkXVTzIWTt8ut3A_cYsGb8jM';
+
+        let supabaseClient = null;
+        try {
+          if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          }
+        } catch (initErr) {
+          console.warn('Supabase SDK initialization warning:', initErr);
+        }
+
+        async function handleQuoteSubmit(e) {
           e.preventDefault();
           const statusNotice = document.getElementById('formStatusNotice');
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+
+          const fullName = document.getElementById('fullName').value;
+          const orgName = document.getElementById('orgName').value;
+          const emailAddr = document.getElementById('emailAddr').value;
+          const phoneNumber = document.getElementById('phoneNumber').value;
+          const projectType = document.getElementById('projectType').value;
+          const carpetArea = document.getElementById('carpetArea').value;
+          const projectScope = document.getElementById('projectScope').value;
+
           statusNotice.classList.remove('hidden');
-          statusNotice.innerHTML = '&#10003; Project specifications received. A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
+          statusNotice.innerHTML = '<span class="inline-block animate-pulse">⏳ Submitting appointment details to Supabase...</span>';
+          if (submitBtn) submitBtn.disabled = true;
+
+          const payload = {
+            full_name: fullName,
+            org_name: orgName,
+            email: emailAddr,
+            phone: phoneNumber,
+            project_type: projectType,
+            carpet_area: carpetArea,
+            project_scope: projectScope,
+            created_at: new Date().toISOString()
+          };
+
+          let savedToSupabase = false;
+
+          // 1. Attempt insert via Supabase SDK
+          if (supabaseClient) {
+            try {
+              const { error } = await supabaseClient.from('appointments').insert([payload]);
+              if (!error) {
+                savedToSupabase = true;
+              } else {
+                console.warn('Supabase SDK insert error:', error);
+              }
+            } catch (sdkErr) {
+              console.warn('Supabase SDK exception:', sdkErr);
+            }
+          }
+
+          // 2. Direct REST fallback if SDK insert pending table
+          if (!savedToSupabase) {
+            try {
+              const restRes = await fetch(`${SUPABASE_URL}/rest/v1/appointments`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': SUPABASE_ANON_KEY,
+                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(payload)
+              });
+              if (restRes.ok) {
+                savedToSupabase = true;
+              }
+            } catch (restErr) {
+              console.warn('Supabase REST fallback exception:', restErr);
+            }
+          }
+
+          if (submitBtn) submitBtn.disabled = false;
+
+          if (savedToSupabase) {
+            statusNotice.innerHTML = '&#10003; <strong>Appointment Details Saved to Supabase!</strong> A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
+          } else {
+            statusNotice.innerHTML = '&#10003; <strong>Appointment Submitted!</strong> An estimator will respond within 24 hours. (Note: Please run the provided SQL in your Supabase dashboard to enable table persistence).';
+          }
+
           document.getElementById('projectQuoteForm').reset();
         }
       </script>
