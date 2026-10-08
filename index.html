@@ -883,12 +883,12 @@
                 </div>
               </div>
             </div>
-            <!-- Interactive Quotation Form -->
+            <!-- Interactive Quotation / Inquiry Form -->
             <div class="lg:col-span-7 bg-charcoal-monolith border border-white/10 p-8 md:p-12 shadow-2xl">
               <form class="space-y-6" id="projectQuoteForm" onsubmit="handleQuoteSubmit(event)">
                 <div class="space-y-2">
                   <span class="font-label-caps text-label-caps text-champagne-gold uppercase tracking-widest font-semibold">Project Inquiry Matrix</span>
-                  <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Request Commercial Estimate</h3>
+                  <h3 class="font-headline-md text-headline-md text-ivory-primary uppercase font-headline-serif">Submit Commercial Inquiry</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="space-y-2">
@@ -928,7 +928,7 @@
                 </div>
                 <div class="hidden p-4 bg-champagne-gold/20 border border-champagne-gold text-champagne-light font-spec-code text-spec-code" id="formStatusNotice"></div>
                 <button class="w-full py-4 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-all flex items-center justify-center gap-2 font-semibold shadow-[0_4px_20px_rgba(212,175,55,0.3)]" type="submit">
-                  <span class="w-2 h-2 bg-royal-black"></span> Dispatch Specifications to Engineering
+                  <span class="w-2 h-2 bg-royal-black"></span> Dispatch Inquiry to Engineering
                 </button>
               </form>
             </div>
@@ -963,7 +963,7 @@
             </div>
             <div class="flex items-center gap-4 pt-4 border-t border-white/10">
               <a class="px-6 py-3 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-colors font-semibold" href="#contact" onclick="closeSpecModal()">
-                Request Formal Quotation
+                Submit Commercial Inquiry
               </a>
               <button class="px-6 py-3 bg-card-surface border border-white/10 text-ivory-primary font-label-caps text-label-caps uppercase tracking-widest hover:border-champagne-gold hover:text-champagne-gold transition-colors flex items-center gap-2" onclick="alert('Downloading standard Revit/BIM 2024 family bundle (.rfa)...')">
                 <span class="material-symbols-outlined text-sm text-champagne-gold">download</span> Download Revit RFA
@@ -1212,7 +1212,7 @@
           document.getElementById('specModal').classList.add('hidden');
         }
 
-        // 4. Supabase Backend Integration
+        // 4. Supabase Backend Integration for Inquiries
         const SUPABASE_PROJECT_ID = 'kjncgruwubukuizrszjs';
         const SUPABASE_URL = 'https://kjncgruwubukuizrszjs.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_WonWtBPtkXVTzIWTt8ut3A_cYsGb8jM';
@@ -1240,7 +1240,7 @@
           const projectScope = document.getElementById('projectScope').value;
 
           statusNotice.classList.remove('hidden');
-          statusNotice.innerHTML = '<span class="inline-block animate-pulse">⏳ Submitting appointment details to Supabase...</span>';
+          statusNotice.innerHTML = '<span class="inline-block animate-pulse">⏳ Submitting inquiry details to Supabase...</span>';
           if (submitBtn) submitBtn.disabled = true;
 
           const payload = {
@@ -1251,29 +1251,33 @@
             project_type: projectType,
             carpet_area: carpetArea,
             project_scope: projectScope,
+            status: 'New',
             created_at: new Date().toISOString()
           };
 
           let savedToSupabase = false;
 
-          // 1. Attempt insert via Supabase SDK
+          // 1. Attempt insert via Supabase SDK to 'inquiries' table
           if (supabaseClient) {
             try {
-              const { error } = await supabaseClient.from('appointments').insert([payload]);
+              const { error } = await supabaseClient.from('inquiries').insert([payload]);
               if (!error) {
                 savedToSupabase = true;
               } else {
                 console.warn('Supabase SDK insert error:', error);
+                // Fallback attempt to 'appointments' table
+                const { error: apptErr } = await supabaseClient.from('appointments').insert([payload]);
+                if (!apptErr) savedToSupabase = true;
               }
             } catch (sdkErr) {
               console.warn('Supabase SDK exception:', sdkErr);
             }
           }
 
-          // 2. Direct REST fallback if SDK insert pending table
+          // 2. Direct REST fallback
           if (!savedToSupabase) {
             try {
-              const restRes = await fetch(`${SUPABASE_URL}/rest/v1/appointments`, {
+              const restRes = await fetch(`${SUPABASE_URL}/rest/v1/inquiries`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -1294,9 +1298,9 @@
           if (submitBtn) submitBtn.disabled = false;
 
           if (savedToSupabase) {
-            statusNotice.innerHTML = '&#10003; <strong>Appointment Details Saved to Supabase!</strong> A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
+            statusNotice.innerHTML = '&#10003; <strong>Inquiry Details Saved to Supabase!</strong> A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
           } else {
-            statusNotice.innerHTML = '&#10003; <strong>Appointment Submitted!</strong> An estimator will respond within 24 hours. (Note: Please run the provided SQL in your Supabase dashboard to enable table persistence).';
+            statusNotice.innerHTML = '&#10003; <strong>Inquiry Submitted!</strong> An estimator will respond within 24 hours. (Note: Ensure the <code>inquiries</code> table is created in your Supabase dashboard).';
           }
 
           document.getElementById('projectQuoteForm').reset();
@@ -1374,6 +1378,7 @@
       <div class="pt-space-xl border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-space-md">
         <div class="flex flex-wrap items-center gap-space-lg">
           <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase tracking-wider">© 2025 FLINT. All Rights Reserved.</span>
+          <a href="#admin-login" onclick="openAdminView('login')" class="font-spec-code-sm text-spec-code-sm text-ivory-muted hover:text-champagne-gold uppercase tracking-wider transition-colors cursor-pointer ml-4">Admin Login</a>
         </div>
         <div class="flex items-center gap-space-md">
           <a aria-label="LinkedIn Portfolio" class="w-9 h-9 bg-charcoal-monolith border border-white/10 flex items-center justify-center text-ivory-secondary hover:text-champagne-gold hover:border-champagne-gold/50 transition-all" href="#"><span class="material-symbols-outlined text-[18px]">corporate_fare</span></a>
@@ -1385,7 +1390,222 @@
     </div>
   </footer>
 
+  <!-- ========================================================================= -->
+  <!-- ADMIN PANEL & INQUIRY DASHBOARD OVERLAY                                  -->
+  <!-- ========================================================================= -->
+  <div id="adminApp" class="fixed inset-0 z-[100] bg-royal-black text-ivory-primary overflow-y-auto hidden">
+    <!-- Admin Top Bar -->
+    <header class="sticky top-0 z-20 bg-charcoal-monolith border-b border-white/10 px-6 py-4 flex items-center justify-between shadow-xl">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 bg-champagne-gold shadow-[0_0_10px_rgba(212,175,55,0.4)]"></div>
+        <span class="font-headline-sm text-headline-sm text-ivory-primary tracking-wider uppercase font-headline-serif font-bold">FLINT Admin Portal</span>
+        <span class="text-xs px-2 py-0.5 bg-champagne-gold/20 text-champagne-light border border-champagne-gold/30 uppercase tracking-widest font-spec-code-sm">Protected System</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="handleAdminLogout()" class="px-4 py-2 bg-royal-black border border-white/10 hover:border-red-500/50 hover:text-red-400 text-ivory-secondary font-label-caps text-label-caps uppercase transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">logout</span> Log Out
+        </button>
+        <button onclick="closeAdminView()" class="p-2 text-ivory-muted hover:text-champagne-gold transition-colors">
+          <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="max-w-[1600px] mx-auto p-6 md:p-10 space-y-8">
+      
+      <!-- Global Alert Banner -->
+      <div id="adminAlertBox" class="hidden p-4 border text-body-sm font-spec-code shadow-md transition-all"></div>
+
+      <!-- 1. ONE-TIME ADMIN SETUP VIEW -->
+      <div id="adminSetupView" class="max-w-md mx-auto my-12 bg-charcoal-monolith border border-champagne-gold/40 p-8 shadow-2xl space-y-6">
+        <div class="space-y-2 text-center">
+          <div class="inline-block px-3 py-1 bg-champagne-gold/10 border border-champagne-gold/30 text-champagne-gold font-spec-code-sm text-spec-code-sm uppercase tracking-widest">
+            Initial System Setup
+          </div>
+          <h2 class="font-headline-lg text-headline-lg text-ivory-primary uppercase font-headline-serif">Create Admin Account</h2>
+          <p class="font-body-sm text-body-sm text-ivory-muted">This setup screen is available only once to create the primary FLINT Administrator.</p>
+        </div>
+
+        <form onsubmit="handleAdminSetup(event)" class="space-y-4">
+          <div class="space-y-1">
+            <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="setupAdminName">Admin Full Name *</label>
+            <input id="setupAdminName" type="text" required placeholder="e.g. Master Administrator" class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="setupAdminEmail">Admin Email Address *</label>
+            <input id="setupAdminEmail" type="email" required placeholder="admin@flint.com" class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="setupAdminPassword">Secure Password *</label>
+            <input id="setupAdminPassword" type="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="setupConfirmPassword">Confirm Password *</label>
+            <input id="setupConfirmPassword" type="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none" />
+          </div>
+          <button type="submit" class="w-full py-4 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-all font-semibold shadow-lg">
+            Initialize Admin Account
+          </button>
+        </form>
+      </div>
+
+      <!-- 2. ADMIN LOGIN VIEW -->
+      <div id="adminLoginView" class="max-w-md mx-auto my-12 bg-charcoal-monolith border border-white/10 p-8 shadow-2xl space-y-6">
+        <div class="space-y-2 text-center">
+          <div class="inline-block px-3 py-1 bg-royal-black border border-white/10 text-champagne-gold font-spec-code-sm text-spec-code-sm uppercase tracking-widest">
+            Authentication Required
+          </div>
+          <h2 class="font-headline-lg text-headline-lg text-ivory-primary uppercase font-headline-serif">Admin Sign In</h2>
+          <p class="font-body-sm text-body-sm text-ivory-muted">Log in with your FLINT Admin credentials to access inquiry management.</p>
+        </div>
+
+        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+          <div class="space-y-1">
+            <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="loginAdminEmail">Admin Email *</label>
+            <input id="loginAdminEmail" type="email" required placeholder="admin@flint.com" class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none" />
+          </div>
+          <div class="space-y-1">
+            <label class="block font-label-caps text-label-caps uppercase text-ivory-secondary" for="loginAdminPassword">Password *</label>
+            <input id="loginAdminPassword" type="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-card-surface border border-white/10 text-ivory-primary text-body-md focus:border-champagne-gold focus:outline-none" />
+          </div>
+          <button type="submit" class="w-full py-4 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest hover:bg-champagne-light transition-all font-semibold shadow-lg">
+            Access Admin Dashboard
+          </button>
+        </form>
+
+        <div id="setupNoticeLink" class="text-center pt-4 border-t border-white/5">
+          <button onclick="openAdminView('setup')" class="text-xs text-champagne-light hover:text-champagne-gold uppercase tracking-wider font-spec-code">
+            Need to set up initial admin account? Click here
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. ADMIN DASHBOARD VIEW -->
+      <div id="adminDashboardView" class="space-y-8 hidden">
+        
+        <!-- Metrics Header Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-6 bg-charcoal-monolith border border-white/10 flex flex-col justify-between shadow-md">
+            <span class="font-spec-code-sm text-spec-code-sm text-ivory-muted uppercase tracking-widest">Total Inquiries</span>
+            <div id="metricTotalInquiries" class="font-headline-2xl text-headline-2xl text-champagne-gold font-headline-serif mt-2">0</div>
+          </div>
+          <div class="p-6 bg-charcoal-monolith border border-white/10 flex flex-col justify-between shadow-md">
+            <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest">New / Action Required</span>
+            <div id="metricNewInquiries" class="font-headline-2xl text-headline-2xl text-ivory-primary font-headline-serif mt-2">0</div>
+          </div>
+          <div class="p-6 bg-charcoal-monolith border border-white/10 flex flex-col justify-between shadow-md">
+            <span class="font-spec-code-sm text-spec-code-sm text-purple-400 uppercase tracking-widest">In Progress / Contacted</span>
+            <div id="metricInProgressInquiries" class="font-headline-2xl text-headline-2xl text-ivory-primary font-headline-serif mt-2">0</div>
+          </div>
+          <div class="p-6 bg-charcoal-monolith border border-white/10 flex flex-col justify-between shadow-md">
+            <span class="font-spec-code-sm text-spec-code-sm text-emerald-400 uppercase tracking-widest">Completed</span>
+            <div id="metricCompletedInquiries" class="font-headline-2xl text-headline-2xl text-ivory-primary font-headline-serif mt-2">0</div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="p-6 bg-charcoal-monolith border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+          <div class="relative w-full md:w-96">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ivory-muted text-lg">search</span>
+            <input id="inquirySearchInput" type="text" oninput="applyFiltersAndRender()" placeholder="Search by customer name, email, phone, or scope..." class="w-full pl-10 pr-4 py-2.5 bg-card-surface border border-white/10 text-ivory-primary text-body-sm focus:border-champagne-gold focus:outline-none" />
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            <select id="inquiryStatusFilter" onchange="applyFiltersAndRender()" class="px-4 py-2.5 bg-card-surface border border-white/10 text-ivory-primary text-body-sm focus:border-champagne-gold focus:outline-none">
+              <option value="All">All Statuses</option>
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+
+            <select id="inquirySortSelect" onchange="applyFiltersAndRender()" class="px-4 py-2.5 bg-card-surface border border-white/10 text-ivory-primary text-body-sm focus:border-champagne-gold focus:outline-none">
+              <option value="newest">Sort: Newest First</option>
+              <option value="oldest">Sort: Oldest First</option>
+            </select>
+
+            <button onclick="loadInquiries()" class="px-4 py-2.5 bg-card-surface border border-white/10 text-champagne-gold hover:border-champagne-gold transition-colors flex items-center gap-2 font-label-caps text-label-caps uppercase">
+              <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Inquiries Table -->
+        <div class="bg-charcoal-monolith border border-white/10 overflow-hidden shadow-2xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 bg-card-surface text-ivory-muted font-label-caps text-label-caps uppercase">
+                  <th class="p-4">Submitted Date</th>
+                  <th class="p-4">Customer Name &amp; Practice</th>
+                  <th class="p-4">Contact Info</th>
+                  <th class="p-4">Project Classification</th>
+                  <th class="p-4">Inquiry Status</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inquiriesTableBody">
+                <!-- Rows injected dynamically by admin.js -->
+              </tbody>
+            </table>
+          </div>
+          <div id="paginationControls" class="p-4 border-t border-white/5 bg-card-surface/40"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INQUIRY DETAIL MODAL -->
+  <div id="inquiryDetailModal" class="fixed inset-0 z-[120] bg-royal-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-charcoal-monolith border border-champagne-gold/40 text-ivory-primary max-w-2xl w-full p-8 shadow-2xl relative space-y-6">
+      <button onclick="closeInquiryModal()" class="absolute top-6 right-6 text-ivory-secondary hover:text-champagne-gold transition-colors">
+        <span class="material-symbols-outlined text-2xl">close</span>
+      </button>
+      
+      <div class="space-y-1">
+        <span class="font-spec-code-sm text-spec-code-sm text-champagne-gold uppercase tracking-widest">Complete Inquiry Record</span>
+        <h3 id="detailCustomerName" class="font-headline-lg text-headline-lg text-ivory-primary uppercase font-headline-serif">Customer Name</h3>
+        <p id="detailCustomerOrg" class="font-spec-code text-spec-code text-champagne-light">-</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-card-surface border border-white/5">
+        <div>
+          <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Email Address</div>
+          <a id="detailEmail" href="#" class="font-spec-code text-spec-code text-champagne-light hover:underline mt-1 block">-</a>
+        </div>
+        <div>
+          <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Phone Number</div>
+          <a id="detailPhone" href="#" class="font-spec-code text-spec-code text-champagne-light hover:underline mt-1 block">-</a>
+        </div>
+        <div>
+          <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Project Classification</div>
+          <div id="detailProjectType" class="font-body-md text-body-md text-ivory-primary mt-1">-</div>
+        </div>
+        <div>
+          <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Approximate Area</div>
+          <div id="detailCarpetArea" class="font-body-md text-body-md text-ivory-primary mt-1">-</div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="font-label-caps text-label-caps text-ivory-muted uppercase">Project Scope &amp; Specifications</div>
+        <p id="detailScopeNotes" class="p-4 bg-card-surface border border-white/5 font-body-md text-body-md text-ivory-secondary leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap">-</p>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-white/10 font-spec-code-sm text-spec-code-sm text-ivory-muted">
+        <div>Created: <span id="detailCreatedAt" class="text-ivory-primary">-</span></div>
+        <button onclick="closeInquiryModal()" class="px-6 py-2.5 bg-champagne-gold text-royal-black font-label-caps text-label-caps uppercase tracking-widest font-semibold hover:bg-champagne-light transition-colors">
+          Close Window
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scroll Animation Script -->
   <script type="module" src="/main.js"></script>
+  <!-- FLINT Admin Panel Script -->
+  <script type="module" src="/admin.js"></script>
 </body>
 </html>
