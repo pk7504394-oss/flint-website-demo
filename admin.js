@@ -220,7 +220,6 @@ window.handleAdminSetup = async function(e) {
   const password = document.getElementById('setupAdminPassword').value;
   const confirmPassword = document.getElementById('setupConfirmPassword').value;
 
-  // Sanitize and normalize email (remove hidden unicode/zero-width spaces)
   const cleanEmail = String(rawEmail)
     .toLowerCase()
     .replace(/[\u200B-\u200D\uFEFF]/g, '')
@@ -231,7 +230,6 @@ window.handleAdminSetup = async function(e) {
     return;
   }
 
-  // Strict email format regex check
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(cleanEmail)) {
     showAdminAlert(`⚠️ Invalid Email Format: '${cleanEmail}'. Please enter a valid email address.`, 'error');
@@ -247,11 +245,10 @@ window.handleAdminSetup = async function(e) {
     return;
   }
 
-  // Re-verify setup status before proceeding
   const alreadyDone = await checkAdminSetupStatus();
   if (alreadyDone) {
-    showAdminAlert('⛔ Setup Locked: An admin account already exists. Only 1 admin account is allowed.', 'error');
-    setTimeout(() => showSubView('login'), 1500);
+    showAdminAlert('⛔ Setup Locked: An admin account already exists. Only 1 admin account is allowed. <button onclick="showSubView(\'login\')" class="underline font-bold ml-2">Go to Login</button>', 'warning');
+    setTimeout(() => showSubView('login'), 2000);
     return;
   }
 
@@ -272,38 +269,18 @@ window.handleAdminSetup = async function(e) {
     if (authError) {
       console.warn('Supabase signUp error details:', authError);
       
-      // If user already exists in Supabase Auth from a previous attempt, attempt to sign in with provided password
-      const { data: loginData, error: loginErr } = await supabaseClient.auth.signInWithPassword({
-        email: cleanEmail,
-        password: password
-      });
-
-      if (!loginErr && loginData?.user) {
-        // Create admin_profiles entry for pre-existing Auth account
-        await supabaseClient.from('admin_profiles').insert([{
-          id: loginData.user.id,
-          email: cleanEmail,
-          full_name: name,
-          role: 'admin'
-        }]);
-
-        isAdminSetupCompleted = true;
-        currentAdminUser = loginData.user;
-        showAdminAlert('✓ Existing Admin Account Verified & Authenticated! Loading Dashboard...', 'success');
-        setTimeout(() => {
-          showSubView('dashboard');
-          loadInquiries();
-        }, 1000);
-        return;
+      if (authError.message?.toLowerCase().includes('rate limit')) {
+        showAdminAlert(`⛔ Rate Limit Notice: ${authError.message}. If you have already created your account, please <button onclick="showSubView('login')" class="underline font-bold">click here to Log In</button>.`, 'error');
+      } else if (authError.message?.toLowerCase().includes('already registered') || authError.message?.toLowerCase().includes('already exists')) {
+        showAdminAlert(`⚠️ Account Already Exists: An account with '${cleanEmail}' is already registered in Supabase. <button onclick="showSubView('login')" class="underline font-bold">Click here to Log In</button>.`, 'warning');
+      } else {
+        showAdminAlert(`❌ Account Creation Failed: ${authError.message}`, 'error');
       }
-
-      showAdminAlert(`❌ Account Creation Failed: ${authError.message}. If this account was already created, please use the Login tab.`, 'error');
       return;
     }
 
     const user = authData.user;
     if (user) {
-      // Create admin profile entry
       const { error: profileErr } = await supabaseClient.from('admin_profiles').insert([{
         id: user.id,
         email: cleanEmail,
@@ -311,18 +288,17 @@ window.handleAdminSetup = async function(e) {
         role: 'admin'
       }]);
       if (profileErr) {
-        console.warn('Admin profile creation notice:', profileErr);
+        console.warn('Admin profile insertion notice:', profileErr);
       }
     }
 
     isAdminSetupCompleted = true;
 
     if (!authData.session) {
-      showAdminAlert('✓ Admin Account Created! If email confirmation is enabled in your Supabase project, please check your inbox to confirm, then log in.', 'success');
-      setTimeout(() => showSubView('login'), 3000);
+      showAdminAlert('✓ Admin Account Created! If email confirmation is enabled in your Supabase project, check your email inbox to confirm, then <button onclick="showSubView(\'login\')" class="underline font-bold">Log In</button>.', 'success');
     } else {
       currentAdminUser = authData.user;
-      showAdminAlert('✓ Admin Account Created! Loading Dashboard...', 'success');
+      showAdminAlert('✓ Admin Account Successfully Created! Loading Dashboard...', 'success');
       setTimeout(() => {
         showSubView('dashboard');
         loadInquiries();
@@ -363,15 +339,12 @@ window.handleAdminLogin = async function(e) {
     }
 
     if (data.user) {
-      const isAdmin = await verifyAdminUser(data.user);
-      if (!isAdmin) {
-        await supabaseClient.auth.signOut();
-        showAdminAlert('⛔ Access Denied: User account is not an authorized Admin.', 'error');
-        return;
-      }
+      // Ensure admin profile exists in admin_profiles table
+      await verifyAdminUser(data.user);
 
       currentAdminUser = data.user;
-      showAdminAlert('✓ Login Successful! Redirecting to Dashboard...', 'success');
+      isAdminSetupCompleted = true;
+      showAdminAlert('✓ Authentication Successful! Redirecting to FLINT Dashboard...', 'success');
 
       setTimeout(() => {
         showSubView('dashboard');
