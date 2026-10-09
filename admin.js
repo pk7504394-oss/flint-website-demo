@@ -334,7 +334,12 @@ window.handleAdminLogin = async function(e) {
     });
 
     if (error) {
-      showAdminAlert(`❌ Login Failed: ${error.message}`, 'error');
+      console.warn('Supabase Login error:', error);
+      if (error.message?.toLowerCase().includes('email not confirmed')) {
+        showAdminAlert(`⚠️ Email Not Confirmed: Account '${cleanEmail}' requires confirmation. Please run the SQL confirmation script in your Supabase Dashboard SQL Editor to mark it confirmed.`, 'warning');
+      } else {
+        showAdminAlert(`❌ Login Failed: ${error.message}`, 'error');
+      }
       return;
     }
 
