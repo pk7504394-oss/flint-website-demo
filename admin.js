@@ -80,6 +80,11 @@ async function checkAdminSetupStatus() {
       isAdminSetupCompleted = true;
       return true;
     }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session?.user && (session.user.email === 'pk7504395@gmail.com' || session.user.user_metadata?.role === 'admin')) {
+      isAdminSetupCompleted = true;
+      return true;
+    }
   } catch (err) {
     console.warn('Check admin profiles warning:', err);
   }
@@ -90,26 +95,51 @@ async function checkAdminSetupStatus() {
 // Verify User's Admin Credentials
 async function verifyAdminUser(user) {
   if (!user) return false;
-  if (user.user_metadata?.role === 'admin') return true;
-  if (!supabaseClient) return false;
-  try {
-    const { data, error } = await supabaseClient.from('admin_profiles').select('id').eq('id', user.id).maybeSingle();
-    if (!error && data) return true;
-    
-    // Auto-heal fallback: If no admin_profiles record exists yet, bind this user as initial admin
-    const { data: allProfiles } = await supabaseClient.from('admin_profiles').select('id').limit(1);
-    if (!allProfiles || allProfiles.length === 0) {
-      await supabaseClient.from('admin_profiles').insert([{
-        id: user.id,
-        email: user.email,
-        full_name: user.user_metadata?.full_name || 'FLINT Admin',
-        role: 'admin'
-      }]);
-      return true;
+
+  // Primary: Recognized FLINT Master Administrator email or admin role metadata
+  if (user.email === 'pk7504395@gmail.com' || user.user_metadata?.role === 'admin') {
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('admin_profiles').upsert([{
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'Master Administrator',
+          role: 'admin'
+        }], { onConflict: 'id' });
+      } catch (err) {
+        console.warn('Admin profile upsert notice:', err);
+      }
     }
-  } catch (err) {
-    console.warn('Verify admin user exception:', err);
+    isAdminSetupCompleted = true;
+    return true;
   }
+
+  // Secondary: Query admin_profiles table
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from('admin_profiles').select('id').eq('id', user.id).maybeSingle();
+      if (!error && data) {
+        isAdminSetupCompleted = true;
+        return true;
+      }
+      
+      // Auto-heal fallback: If no admin_profiles record exists yet, bind this user as initial admin
+      const { data: allProfiles } = await supabaseClient.from('admin_profiles').select('id').limit(1);
+      if (!allProfiles || allProfiles.length === 0) {
+        await supabaseClient.from('admin_profiles').insert([{
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'FLINT Admin',
+          role: 'admin'
+        }]);
+        isAdminSetupCompleted = true;
+        return true;
+      }
+    } catch (err) {
+      console.warn('Verify admin user exception:', err);
+    }
+  }
+
   return false;
 }
 
