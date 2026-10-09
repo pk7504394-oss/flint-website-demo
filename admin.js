@@ -216,14 +216,28 @@ function showAdminAlert(message, type = 'info') {
 window.handleAdminSetup = async function(e) {
   e.preventDefault();
   const name = document.getElementById('setupAdminName').value.trim();
-  const email = document.getElementById('setupAdminEmail').value.trim();
+  const rawEmail = document.getElementById('setupAdminEmail').value;
   const password = document.getElementById('setupAdminPassword').value;
   const confirmPassword = document.getElementById('setupConfirmPassword').value;
 
-  if (!email || !password || !name) {
+  // Sanitize and normalize email (remove hidden unicode/zero-width spaces)
+  const cleanEmail = String(rawEmail)
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim();
+
+  if (!cleanEmail || !password || !name) {
     showAdminAlert('Please fill in all setup fields.', 'error');
     return;
   }
+
+  // Strict email format regex check
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cleanEmail)) {
+    showAdminAlert(`⚠️ Invalid Email Format: '${cleanEmail}'. Please enter a valid email address.`, 'error');
+    return;
+  }
+
   if (password !== confirmPassword) {
     showAdminAlert('Passwords do not match. Please re-enter.', 'error');
     return;
@@ -244,16 +258,46 @@ window.handleAdminSetup = async function(e) {
   showAdminAlert('⏳ Creating initial FLINT Admin Account in Supabase...', 'info');
 
   try {
+    const redirectUrl = typeof window !== 'undefined' ? (window.location.origin + '/#admin-login') : undefined;
+
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-      email,
-      password,
+      email: cleanEmail,
+      password: password,
       options: {
+        emailRedirectTo: redirectUrl,
         data: { full_name: name, role: 'admin' }
       }
     });
 
     if (authError) {
-      showAdminAlert(`❌ Account Creation Failed: ${authError.message}`, 'error');
+      console.warn('Supabase signUp error details:', authError);
+      
+      // If user already exists in Supabase Auth from a previous attempt, attempt to sign in with provided password
+      const { data: loginData, error: loginErr } = await supabaseClient.auth.signInWithPassword({
+        email: cleanEmail,
+        password: password
+      });
+
+      if (!loginErr && loginData?.user) {
+        // Create admin_profiles entry for pre-existing Auth account
+        await supabaseClient.from('admin_profiles').insert([{
+          id: loginData.user.id,
+          email: cleanEmail,
+          full_name: name,
+          role: 'admin'
+        }]);
+
+        isAdminSetupCompleted = true;
+        currentAdminUser = loginData.user;
+        showAdminAlert('✓ Existing Admin Account Verified & Authenticated! Loading Dashboard...', 'success');
+        setTimeout(() => {
+          showSubView('dashboard');
+          loadInquiries();
+        }, 1000);
+        return;
+      }
+
+      showAdminAlert(`❌ Account Creation Failed: ${authError.message}. If this account was already created, please use the Login tab.`, 'error');
       return;
     }
 
@@ -262,7 +306,7 @@ window.handleAdminSetup = async function(e) {
       // Create admin profile entry
       const { error: profileErr } = await supabaseClient.from('admin_profiles').insert([{
         id: user.id,
-        email: email,
+        email: cleanEmail,
         full_name: name,
         role: 'admin'
       }]);
@@ -292,10 +336,15 @@ window.handleAdminSetup = async function(e) {
 // 4. ADMIN LOGIN HANDLER
 window.handleAdminLogin = async function(e) {
   e.preventDefault();
-  const email = document.getElementById('loginAdminEmail').value.trim();
+  const rawEmail = document.getElementById('loginAdminEmail').value;
   const password = document.getElementById('loginAdminPassword').value;
 
-  if (!email || !password) {
+  const cleanEmail = String(rawEmail)
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim();
+
+  if (!cleanEmail || !password) {
     showAdminAlert('Please enter both email and password.', 'error');
     return;
   }
@@ -304,8 +353,8 @@ window.handleAdminLogin = async function(e) {
 
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
+      email: cleanEmail,
+      password: password
     });
 
     if (error) {
