@@ -25,6 +25,52 @@ let currentPage = 1;
 const itemsPerPage = 8;
 let isAdminSetupCompleted = false;
 
+// Initialize Hash & Auth Listeners on Load
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    initAuthListener();
+    handleUrlHashNavigation();
+  });
+  window.addEventListener('hashchange', handleUrlHashNavigation);
+}
+
+async function handleUrlHashNavigation() {
+  const hash = window.location.hash;
+  if (hash === '#admin-login' || hash === '#admin-setup' || hash === '#admin-dashboard') {
+    const targetView = hash.replace('#admin-', '');
+    await openAdminView(targetView);
+  }
+}
+
+function initAuthListener() {
+  if (!supabaseClient) return;
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    console.log('FLINT Auth Event:', event);
+    if (event === 'SIGNED_IN' && session?.user) {
+      currentAdminUser = session.user;
+      const isAdmin = await verifyAdminUser(session.user);
+      if (isAdmin) {
+        if (window.location.hash.startsWith('#admin')) {
+          showSubView('dashboard');
+          loadInquiries();
+        }
+      } else {
+        await supabaseClient.auth.signOut();
+        currentAdminUser = null;
+        showAdminAlert('⛔ Access Denied: User account is not an authorized FLINT Admin.', 'error');
+        showSubView('login');
+      }
+    } else if (event === 'SIGNED_OUT') {
+      currentAdminUser = null;
+      allInquiries = [];
+      filteredInquiries = [];
+      if (window.location.hash.startsWith('#admin')) {
+        showSubView('login');
+      }
+    }
+  });
+}
+
 // 1. One-Time Setup Check
 async function checkAdminSetupStatus() {
   if (!supabaseClient) return false;
@@ -37,6 +83,33 @@ async function checkAdminSetupStatus() {
   } catch (err) {
     console.warn('Check admin profiles warning:', err);
   }
+  isAdminSetupCompleted = false;
+  return false;
+}
+
+// Verify User's Admin Credentials
+async function verifyAdminUser(user) {
+  if (!user) return false;
+  if (user.user_metadata?.role === 'admin') return true;
+  if (!supabaseClient) return false;
+  try {
+    const { data, error } = await supabaseClient.from('admin_profiles').select('id').eq('id', user.id).maybeSingle();
+    if (!error && data) return true;
+    
+    // Auto-heal fallback: If no admin_profiles record exists yet, bind this user as initial admin
+    const { data: allProfiles } = await supabaseClient.from('admin_profiles').select('id').limit(1);
+    if (!allProfiles || allProfiles.length === 0) {
+      await supabaseClient.from('admin_profiles').insert([{
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || 'FLINT Admin',
+        role: 'admin'
+      }]);
+      return true;
+    }
+  } catch (err) {
+    console.warn('Verify admin user exception:', err);
+  }
   return false;
 }
 
@@ -48,29 +121,41 @@ window.openAdminView = async function(viewName = 'login') {
   adminApp.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
-  // Check auth session
+  // 1. Check existing session
   if (supabaseClient) {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session && session.user) {
-      currentAdminUser = session.user;
-      showSubView('dashboard');
-      loadInquiries();
-      return;
+      const isAdmin = await verifyAdminUser(session.user);
+      if (isAdmin) {
+        currentAdminUser = session.user;
+        showSubView('dashboard');
+        loadInquiries();
+        return;
+      }
     }
   }
 
-  // Check if one-time setup already done
-  await checkAdminSetupStatus();
+  // 2. Check setup status
+  const setupDone = await checkAdminSetupStatus();
 
   if (viewName === 'setup') {
-    if (isAdminSetupCompleted) {
-      showAdminAlert('Admin setup is already completed. Redirecting to Login...', 'warning');
-      setTimeout(() => showSubView('login'), 1500);
-      return;
+    if (setupDone) {
+      showAdminAlert('⚠️ Admin setup is already completed. Please log in with your credentials.', 'warning');
+      showSubView('login');
+    } else {
+      showAdminAlert('ℹ️ Welcome to FLINT Admin Setup. Create your initial admin account.', 'info');
+      showSubView('setup');
     }
-    showSubView('setup');
-  } else {
+  } else if (viewName === 'dashboard') {
+    showAdminAlert('🔒 Please log in to access the FLINT Admin Dashboard.', 'error');
     showSubView('login');
+  } else {
+    if (!setupDone) {
+      showAdminAlert('ℹ️ No admin account found. Please complete the Initial Admin Setup first.', 'info');
+      showSubView('setup');
+    } else {
+      showSubView('login');
+    }
   }
 };
 
@@ -78,6 +163,9 @@ window.closeAdminView = function() {
   const adminApp = document.getElementById('adminApp');
   if (adminApp) adminApp.classList.add('hidden');
   document.body.style.overflow = '';
+  if (window.location.hash.startsWith('#admin')) {
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+  }
 };
 
 function showSubView(viewName) {
@@ -110,12 +198,14 @@ function showSubView(viewName) {
 function showAdminAlert(message, type = 'info') {
   const alertBox = document.getElementById('adminAlertBox');
   if (!alertBox) return;
-  alertBox.classList.remove('hidden', 'bg-red-500/20', 'border-red-500', 'bg-emerald-500/20', 'border-emerald-500', 'bg-champagne-gold/20', 'border-champagne-gold');
+  alertBox.classList.remove('hidden', 'bg-red-500/20', 'border-red-500', 'text-red-300', 'bg-emerald-500/20', 'border-emerald-500', 'text-emerald-300', 'bg-champagne-gold/20', 'border-champagne-gold', 'text-champagne-light');
 
   if (type === 'error') {
     alertBox.classList.add('bg-red-500/20', 'border-red-500', 'text-red-300');
   } else if (type === 'success') {
     alertBox.classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-300');
+  } else if (type === 'warning') {
+    alertBox.classList.add('bg-amber-500/20', 'border-amber-500', 'text-amber-200');
   } else {
     alertBox.classList.add('bg-champagne-gold/20', 'border-champagne-gold', 'text-champagne-light');
   }
@@ -130,8 +220,12 @@ window.handleAdminSetup = async function(e) {
   const password = document.getElementById('setupAdminPassword').value;
   const confirmPassword = document.getElementById('setupConfirmPassword').value;
 
+  if (!email || !password || !name) {
+    showAdminAlert('Please fill in all setup fields.', 'error');
+    return;
+  }
   if (password !== confirmPassword) {
-    showAdminAlert('Passwords do not match. Please re-enter passwords.', 'error');
+    showAdminAlert('Passwords do not match. Please re-enter.', 'error');
     return;
   }
   if (password.length < 6) {
@@ -139,15 +233,15 @@ window.handleAdminSetup = async function(e) {
     return;
   }
 
-  // Double check setup status
+  // Re-verify setup status before proceeding
   const alreadyDone = await checkAdminSetupStatus();
   if (alreadyDone) {
-    showAdminAlert('One-time setup has already been completed. Account creation disabled.', 'error');
+    showAdminAlert('⛔ Setup Locked: An admin account already exists. Only 1 admin account is allowed.', 'error');
     setTimeout(() => showSubView('login'), 1500);
     return;
   }
 
-  showAdminAlert('⏳ Creating initial FLINT Admin Account...', 'info');
+  showAdminAlert('⏳ Creating initial FLINT Admin Account in Supabase...', 'info');
 
   try {
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -159,31 +253,39 @@ window.handleAdminSetup = async function(e) {
     });
 
     if (authError) {
-      showAdminAlert(`Setup Failed: ${authError.message}`, 'error');
+      showAdminAlert(`❌ Account Creation Failed: ${authError.message}`, 'error');
       return;
     }
 
-    const userId = authData.user ? authData.user.id : null;
-    if (userId) {
-      // Create admin profile entry to block future setups
-      await supabaseClient.from('admin_profiles').insert([{
-        id: userId,
+    const user = authData.user;
+    if (user) {
+      // Create admin profile entry
+      const { error: profileErr } = await supabaseClient.from('admin_profiles').insert([{
+        id: user.id,
         email: email,
         full_name: name,
         role: 'admin'
       }]);
+      if (profileErr) {
+        console.warn('Admin profile creation notice:', profileErr);
+      }
     }
 
     isAdminSetupCompleted = true;
-    currentAdminUser = authData.user;
-    showAdminAlert('✓ Admin Account Created! Logging into FLINT Admin Dashboard...', 'success');
-    
-    setTimeout(() => {
-      showSubView('dashboard');
-      loadInquiries();
-    }, 1200);
+
+    if (!authData.session) {
+      showAdminAlert('✓ Admin Account Created! If email confirmation is enabled in your Supabase project, please check your inbox to confirm, then log in.', 'success');
+      setTimeout(() => showSubView('login'), 3000);
+    } else {
+      currentAdminUser = authData.user;
+      showAdminAlert('✓ Admin Account Created! Loading Dashboard...', 'success');
+      setTimeout(() => {
+        showSubView('dashboard');
+        loadInquiries();
+      }, 1000);
+    }
   } catch (err) {
-    showAdminAlert(`Setup Error: ${err.message}`, 'error');
+    showAdminAlert(`❌ Setup Exception: ${err.message}`, 'error');
   }
 };
 
@@ -193,7 +295,12 @@ window.handleAdminLogin = async function(e) {
   const email = document.getElementById('loginAdminEmail').value.trim();
   const password = document.getElementById('loginAdminPassword').value;
 
-  showAdminAlert('⏳ Authenticating Admin Credentials...', 'info');
+  if (!email || !password) {
+    showAdminAlert('Please enter both email and password.', 'error');
+    return;
+  }
+
+  showAdminAlert('⏳ Authenticating with Supabase Auth...', 'info');
 
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -202,19 +309,28 @@ window.handleAdminLogin = async function(e) {
     });
 
     if (error) {
-      showAdminAlert(`Login Failed: ${error.message}`, 'error');
+      showAdminAlert(`❌ Login Failed: ${error.message}`, 'error');
       return;
     }
 
-    currentAdminUser = data.user;
-    showAdminAlert('✓ Login Successful! Loading Admin Dashboard...', 'success');
+    if (data.user) {
+      const isAdmin = await verifyAdminUser(data.user);
+      if (!isAdmin) {
+        await supabaseClient.auth.signOut();
+        showAdminAlert('⛔ Access Denied: User account is not an authorized Admin.', 'error');
+        return;
+      }
 
-    setTimeout(() => {
-      showSubView('dashboard');
-      loadInquiries();
-    }, 1000);
+      currentAdminUser = data.user;
+      showAdminAlert('✓ Login Successful! Redirecting to Dashboard...', 'success');
+
+      setTimeout(() => {
+        showSubView('dashboard');
+        loadInquiries();
+      }, 800);
+    }
   } catch (err) {
-    showAdminAlert(`Authentication Error: ${err.message}`, 'error');
+    showAdminAlert(`❌ Authentication Error: ${err.message}`, 'error');
   }
 };
 
@@ -234,25 +350,46 @@ window.handleAdminLogout = async function() {
 window.loadInquiries = async function() {
   const tableContainer = document.getElementById('inquiriesTableBody');
   if (tableContainer) {
-    tableContainer.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-ivory-muted"><span class="animate-pulse">Loading inquiries from Supabase...</span></td></tr>';
+    tableContainer.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-ivory-muted"><span class="animate-pulse">Loading real inquiries from Supabase database...</span></td></tr>';
   }
 
   let inquiriesData = [];
+  let fetchError = null;
 
   if (supabaseClient) {
     try {
-      // Primary: 'inquiries' table
-      const { data, error } = await supabaseClient.from('inquiries').select('*').order('created_at', { ascending: false });
-      if (!error && data) {
-        inquiriesData = data;
-      } else {
+      const { data, error } = await supabaseClient
+        .from('inquiries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        fetchError = error.message || JSON.stringify(error);
+        console.warn('Inquiries fetch error:', error);
+        
         // Fallback: 'appointments' table
-        const { data: apptData } = await supabaseClient.from('appointments').select('*').order('created_at', { ascending: false });
-        if (apptData) inquiriesData = apptData;
+        const { data: apptData, error: apptError } = await supabaseClient
+          .from('appointments')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!apptError && apptData) {
+          inquiriesData = apptData;
+          fetchError = null;
+        }
+      } else if (data) {
+        inquiriesData = data;
       }
     } catch (err) {
-      console.warn('Inquiries fetch warning:', err);
+      fetchError = err.message;
+      console.warn('Inquiries fetch exception:', err);
     }
+  } else {
+    fetchError = 'Supabase client not initialized.';
+  }
+
+  if (fetchError) {
+    showAdminAlert(`⚠️ Database Query Notice: ${fetchError}. (Ensure the <code>inquiries</code> table is created in Supabase SQL Editor).`, 'warning');
   }
 
   allInquiries = inquiriesData.map(item => ({
@@ -261,7 +398,7 @@ window.loadInquiries = async function() {
     org_name: item.org_name || 'Individual / Practice',
     email: item.email || item.emailAddr || 'N/A',
     phone: item.phone || item.phoneNumber || 'N/A',
-    project_type: item.project_type || item.projectType || 'Corporate Headquarters',
+    project_type: item.project_type || item.projectType || 'Corporate Workspace',
     carpet_area: item.carpet_area || item.carpetArea || 'Standard Scope',
     project_scope: item.project_scope || item.projectScope || 'No detailed scope notes provided.',
     status: item.status || 'New',
@@ -383,7 +520,6 @@ function renderTable() {
     `;
   }).join('');
 
-  // Pagination Controls
   if (paginationControls && totalPages > 1) {
     paginationControls.innerHTML = `
       <div class="flex items-center justify-between pt-4 border-t border-white/10 font-spec-code-sm text-spec-code-sm text-ivory-muted">
@@ -443,7 +579,7 @@ window.openInquiryModal = function(inquiryId) {
   modal.classList.remove('hidden');
 };
 
-window.closeInquiryModal = function() {
+closeInquiryModal = function() {
   const modal = document.getElementById('inquiryDetailModal');
   if (modal) modal.classList.add('hidden');
 };
@@ -457,7 +593,6 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// Global Keyboard Handler for Esc key
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeInquiryModal();

@@ -1231,79 +1231,85 @@
           const statusNotice = document.getElementById('formStatusNotice');
           const submitBtn = e.target.querySelector('button[type="submit"]');
 
-          const fullName = document.getElementById('fullName').value;
-          const orgName = document.getElementById('orgName').value;
-          const emailAddr = document.getElementById('emailAddr').value;
-          const phoneNumber = document.getElementById('phoneNumber').value;
+          const fullName = document.getElementById('fullName').value.trim();
+          const orgName = document.getElementById('orgName').value.trim();
+          const emailAddr = document.getElementById('emailAddr').value.trim();
+          const phoneNumber = document.getElementById('phoneNumber').value.trim();
           const projectType = document.getElementById('projectType').value;
           const carpetArea = document.getElementById('carpetArea').value;
-          const projectScope = document.getElementById('projectScope').value;
+          const projectScope = document.getElementById('projectScope').value.trim();
+
+          if (!fullName || !emailAddr || !phoneNumber) {
+            statusNotice.classList.remove('hidden');
+            statusNotice.className = 'p-4 rounded border font-spec-code-sm text-spec-code-sm bg-red-500/20 border-red-500 text-red-300 mb-6';
+            statusNotice.innerHTML = '⚠️ Please fill in all required fields (Full Name, Email Address, and Phone Number).';
+            return;
+          }
 
           statusNotice.classList.remove('hidden');
+          statusNotice.className = 'p-4 rounded border font-spec-code-sm text-spec-code-sm bg-champagne-gold/20 border-champagne-gold text-champagne-light mb-6';
           statusNotice.innerHTML = '<span class="inline-block animate-pulse">⏳ Submitting inquiry details to Supabase...</span>';
-          if (submitBtn) submitBtn.disabled = true;
+          
+          let origBtnText = '';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            origBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="inline-block animate-pulse">Submitting Brief...</span>';
+          }
 
           const payload = {
             full_name: fullName,
-            org_name: orgName,
+            org_name: orgName || 'Individual / Practice',
             email: emailAddr,
             phone: phoneNumber,
-            project_type: projectType,
-            carpet_area: carpetArea,
-            project_scope: projectScope,
+            project_type: projectType || 'Corporate Headquarters',
+            carpet_area: carpetArea || 'Standard Scope',
+            project_scope: projectScope || 'No detailed scope notes provided.',
             status: 'New',
             created_at: new Date().toISOString()
           };
 
           let savedToSupabase = false;
+          let errorMessage = '';
 
           // 1. Attempt insert via Supabase SDK to 'inquiries' table
           if (supabaseClient) {
             try {
-              const { error } = await supabaseClient.from('inquiries').insert([payload]);
+              const { data, error } = await supabaseClient.from('inquiries').insert([payload]).select();
               if (!error) {
                 savedToSupabase = true;
               } else {
                 console.warn('Supabase SDK insert error:', error);
+                errorMessage = error.message || error.details || JSON.stringify(error);
+                
                 // Fallback attempt to 'appointments' table
-                const { error: apptErr } = await supabaseClient.from('appointments').insert([payload]);
-                if (!apptErr) savedToSupabase = true;
+                const { error: apptErr } = await supabaseClient.from('appointments').insert([payload]).select();
+                if (!apptErr) {
+                  savedToSupabase = true;
+                  errorMessage = '';
+                }
               }
             } catch (sdkErr) {
               console.warn('Supabase SDK exception:', sdkErr);
+              errorMessage = sdkErr.message || 'Network exception connecting to Supabase.';
             }
+          } else {
+            errorMessage = 'Supabase SDK client is not initialized.';
           }
 
-          // 2. Direct REST fallback
-          if (!savedToSupabase) {
-            try {
-              const restRes = await fetch(`${SUPABASE_URL}/rest/v1/inquiries`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'apikey': SUPABASE_ANON_KEY,
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                  'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify(payload)
-              });
-              if (restRes.ok) {
-                savedToSupabase = true;
-              }
-            } catch (restErr) {
-              console.warn('Supabase REST fallback exception:', restErr);
-            }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnText;
           }
-
-          if (submitBtn) submitBtn.disabled = false;
 
           if (savedToSupabase) {
-            statusNotice.innerHTML = '&#10003; <strong>Inquiry Details Saved to Supabase!</strong> A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
+            statusNotice.className = 'p-4 rounded border font-spec-code-sm text-spec-code-sm bg-emerald-500/20 border-emerald-500 text-emerald-300 mb-6';
+            statusNotice.innerHTML = '✓ <strong>Inquiry Details Saved to Supabase!</strong> A FLINT Senior Estimator has been assigned to your brief and will respond within 24 hours.';
+            document.getElementById('projectQuoteForm').reset();
           } else {
-            statusNotice.innerHTML = '&#10003; <strong>Inquiry Submitted!</strong> An estimator will respond within 24 hours. (Note: Ensure the <code>inquiries</code> table is created in your Supabase dashboard).';
+            statusNotice.className = 'p-4 rounded border font-spec-code-sm text-spec-code-sm bg-red-500/20 border-red-500 text-red-300 mb-6';
+            statusNotice.innerHTML = `❌ <strong>Inquiry Submission Failed:</strong> ${errorMessage}<br><span class="text-xs text-ivory-muted mt-1 block">Ensure the <code>inquiries</code> table and RLS policies are created in Supabase SQL Editor.</span>`;
           }
-
-          document.getElementById('projectQuoteForm').reset();
         }
       </script>
     </div>
