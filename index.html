@@ -1275,7 +1275,7 @@
           // 1. Attempt insert via Supabase SDK to 'inquiries' table
           if (supabaseClient) {
             try {
-              const { data, error } = await supabaseClient.from('inquiries').insert([payload]).select();
+              const { error } = await supabaseClient.from('inquiries').insert([payload]);
               if (!error) {
                 savedToSupabase = true;
               } else {
@@ -1283,7 +1283,7 @@
                 errorMessage = error.message || error.details || JSON.stringify(error);
                 
                 // Fallback attempt to 'appointments' table
-                const { error: apptErr } = await supabaseClient.from('appointments').insert([payload]).select();
+                const { error: apptErr } = await supabaseClient.from('appointments').insert([payload]);
                 if (!apptErr) {
                   savedToSupabase = true;
                   errorMessage = '';
